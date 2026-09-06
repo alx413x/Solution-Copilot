@@ -1,0 +1,14 @@
+{
+  "name": "solution-copilot",
+  "private": true,
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @solution/web dev",
+    "build": "pnpm --filter @solution/web build",
+    "check": "pnpm --filter @solution/web check",
+    "contracts": "uv run python -m scripts.export_openapi && pnpm --filter @solution/web exec openapi-typescript ../../packages/contracts/openapi.json -o ../../packages/contracts/api.d.ts"
+  }
+}
