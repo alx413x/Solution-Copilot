@@ -1,10 +1,10 @@
 # S00 验收记录
 
-日期：2026-09-06。工作区：`/Users/deyi/Documents/ChatGPT/SolutionEngineerAgent`，分支 `main`，尚无 Git 提交。本记录对应当前未提交工作区。
+日期：2026-09-06。工作区：`/Users/deyi/Documents/ChatGPT/SolutionEngineerAgent`，分支 `main`。已验收代码归档为 `0b40fec`（feat: initialize S00 Solution Copilot skeleton），本次文档提交仅更新归档状态。
 
 ## 范围与结果
 
-S00 工程骨架验收通过，状态为 `review`（工作区交付；待版本归档整合）。S01–S09 未实施。
+S00 工程骨架验收通过，状态为 `done`（验收证据与整合版本已记录）。S01–S09 未实施。
 
 | 验收项 | 命令 / 方法 | 结果 |
 | --- | --- | --- |
