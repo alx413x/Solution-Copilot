@@ -1364,3 +1364,14 @@ class EmbeddingModel(Protocol):
 8. MVP 是否包含 PDF 导出。
 
 这些事项未决定时，应保持接口可替换，不应把供应商细节扩散到领域层。
+
+
+## 25. S01 实施补充（2026-09-07，D014）
+
+- `users.dev_token_hash` 为仅开发使用的可空唯一 SHA-256 摘要字段；`customer_access` 以 organization/customer/user 三元组授权，组合外键关联客户和成员。
+- Customer/Project 增加整型 `version`（初始 1），使用 SQLAlchemy version_id_col；所有 PATCH/归档需携带当前 version。PATCH 保留省略字段，不允许修改组织、客户归属、负责人或项目状态。
+- 客户归档使用既有 DELETE 软删除路径，返回归档后的客户；旗下项目停止创建/修改，保留读取；项目 archived 只读。列表返回 `{items,next_cursor}`，以 UUID 升序游标分页，`archived` 选择归档范围。
+- S01 owner 创建客户，owner/member 可管理授权内数据，viewer 只读；组织/成员/授权本阶段通过受控 seed/数据库配置，暂不提供管理页面。
+- `/api/v1/me` 返回当前用户与所属组织/角色；JWT/JWKS 验证已实现，真实 OIDC 供应商和 Web 授权码登录流程待部署前接入，当前 token 登录仅作为可运行入口。
+- Web 新增查询/表单运行依赖 TanStack Query、react-hook-form、@hookform/resolvers、zod；Prettier 为格式检查开发依赖。状态页及业务页沿用语义 CSS tokens；Tailwind/shadcn 在需要具体业务组件时引入。
+- S01 项目总览只展示已实现的资料与负责人，不提供未实现的需求/知识/对话操作；后续阶段补齐 14.2 工作台侧栏和来源面板。

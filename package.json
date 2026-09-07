@@ -9,6 +9,11 @@
     "dev": "pnpm --filter @solution/web dev",
     "build": "pnpm --filter @solution/web build",
     "check": "pnpm --filter @solution/web check",
-    "contracts": "uv run python -m scripts.export_openapi && pnpm --filter @solution/web exec openapi-typescript ../../packages/contracts/openapi.json -o ../../packages/contracts/api.d.ts"
+    "contracts": "uv run python -m scripts.export_openapi && pnpm --filter @solution/web exec openapi-typescript ../../packages/contracts/openapi.json -o ../../packages/contracts/api.d.ts",
+    "format": "prettier --write \"apps/web/**/*.{ts,tsx,css}\"",
+    "format:check": "prettier --check \"apps/web/**/*.{ts,tsx,css}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6"
   }
 }

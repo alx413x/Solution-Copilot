@@ -1,6 +1,6 @@
 # Solution Copilot 决策台账
 
-更新日期：2026-09-06。
+更新日期：2026-09-07。
 
 ## 状态与维护方法
 
@@ -71,7 +71,7 @@
 
 ## D008 — 身份与数据授权细化
 
-- 状态：open；解决期限：S01，责任：阶段执行者/总控。
+- 状态：open（部分落实）；开发身份、角色与客户授权、RLS 选择已由 D014 落实；真实生产 OIDC 供应商与联调仍待部署前确定。
 - 待定：OIDC 提供方、开发身份机制、member/viewer 的客户授权映射、是否启用 PostgreSQL RLS。
 - 原因：SPEC 定义了角色但没有完整资源授权表；接口过滤必须有可靠授权来源。
 - 验收：两组织、同组织两个客户、不同角色样例覆盖 API、Worker、检索及恢复路径。开发身份不可在生产开启。
@@ -128,3 +128,16 @@
 - 初始化：显式幂等创建 vector 扩展与私有 bucket；不由 API 启动自动改表。
 - 基线核对：[Next.js 16 运行要求](https://nextjs.org/docs/app/guides/upgrading/version-16)、[pnpm 10 安装](https://github.com/pnpm/pnpm.io/blob/main/versioned_docs/version-10.x/installation.md)、[MinIO 镜像与许可证](https://hub.docker.com/r/minio/minio/)。MinIO 固定已发布 release，仅本地开发；生产发布须重新验证维护与许可证条件。
 - 验证证据与未验证项：见 STATUS S00 交接及 docs/S00_VALIDATION.md。
+
+## D014 — S01 身份、授权和归档契约
+
+- 状态：baseline；日期：2026-09-06。落实 D008 的开发机制与权限部分；生产 OIDC 供应商仍待配置。
+- API：Bearer 身份；开发凭据为随机 token，数据库仅存 SHA-256 摘要，默认禁用且生产禁止启用。生产使用固定 RS256/JWKS、issuer、audience、exp、sub 验证，不信任请求提供的角色。
+- 当前组织由请求选择，但必须查询有效 Membership；所有资源查询同时限定组织。owner 全组织；member/viewer 仅客户授权表列出的客户。owner 可创建客户，member 可修改已授权客户和创建/编辑项目，viewer 仅查看。
+- 数据库：SQLAlchemy 2 + Alembic；组织一致性由组合外键加固。S01 不启用 RLS，应用层授权服务是 API 和未来 Worker 共用入口；未来任务执行必须重新验证成员及客户授权。
+- 客户归档用 deleted_at，隐藏默认列表并禁止旗下项目修改/创建；归档项目保留可读且不可编辑。项目业务状态不能由 PATCH 任意修改，S01 仅 collecting 与 archive。
+- 客户/项目增加 version 乐观锁；PATCH 和归档要求 version，旧版本返回 409。资源越权统一 404，角色不足 403；列表授权前置、UUID 游标分页。
+- Web：同源代理，Bearer 存 HttpOnly/SameSite=Strict cookie；写请求检查 Origin。不会把服务端凭据写入公开前端变量。
+- 验证：真实 PostgreSQL 两组织/两客户/三角色，伪造身份、跨组织/客户、归档和版本冲突测试；生产禁止开发模式测试。S02 起补充具体 Worker 用例的执行时鉴权测试。
+
+D014 技术核对：[PyJWT 校验 API](https://pyjwt.readthedocs.io/en/stable/api.html)、[SQLAlchemy 组合外键](https://docs.sqlalchemy.org/en/20/core/constraints.html)。实现版本由锁文件维护；S01 验收见 docs/S01_VALIDATION.md。

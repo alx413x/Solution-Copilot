@@ -1,7 +1,43 @@
-from fastapi import FastAPI, Response
+from contextlib import asynccontextmanager
+from uuid import uuid4
+
+from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from solution_copilot.application.errors import AppError
+from solution_copilot.config import get_settings
 from solution_copilot.infrastructure.health import HealthReport, readiness
 
-app = FastAPI(title="Solution Copilot API", version="0.1.0")
+from apps.api.customers import router
+
+
+@asynccontextmanager
+async def lifespan(app):
+    get_settings()  # Fail startup if production enables development authentication.
+    yield
+
+
+app = FastAPI(title="Solution Copilot API", version="0.2.0", lifespan=lifespan)
+app.include_router(router)
+
+
+def error_response(status, code, message):
+    return JSONResponse(
+        status_code=status,
+        content={
+            "error": {"code": code, "message": message, "details": {}, "request_id": str(uuid4())}
+        },
+    )
+
+
+@app.exception_handler(AppError)
+async def app_error(request: Request, exc: AppError):
+    return error_response(exc.status, exc.code, exc.message)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError):
+    return error_response(422, "VALIDATION_ERROR", "输入格式不正确，请检查必填项和字段长度。")
 
 
 @app.get("/api/v1/health/live")

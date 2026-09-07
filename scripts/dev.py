@@ -10,7 +10,7 @@ from pathlib import Path
 from dotenv import dotenv_values
 
 os.chdir(Path(__file__).resolve().parents[1])
-env = {**os.environ, **{k: v for k, v in dotenv_values(".env").items() if v is not None}}
+env = {**{k: v for k, v in dotenv_values(".env").items() if v is not None}, **os.environ}
 commands = [
     [sys.executable, "-m", "uvicorn", "apps.api.main:app", "--host", "127.0.0.1", "--port", "8000"],
     [

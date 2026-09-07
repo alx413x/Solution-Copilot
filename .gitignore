@@ -9,3 +9,6 @@ __pycache__/
 *.tsbuildinfo
 
 .pnpm-store/
+
+.local/
+apps/web/next-env.d.ts
