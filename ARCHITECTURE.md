@@ -1,6 +1,6 @@
 # Solution Copilot 架构总览
 
-更新日期：2026-09-08。状态：S00/S01/S02 已实现；检索及后续业务流程仍为设计基线。
+更新日期：2026-09-09。状态：S00–S03 已实现；需求结构化及后续业务流程仍为设计基线。
 
 ## 架构定位
 
@@ -42,11 +42,11 @@ S02 将业务记录与 jobs 意图先提交 PostgreSQL，独立 dispatcher 再�
 
 上传与鉴权 → 文件验证与私有存储 → 文档记录/任务 → 解析 → 带页码或章节的分块 → Embedding/关键词索引 → ready。
 
-当前 S02 在解析后停于 `parsed`，索引由 S03 实现。上传先保存原文件的 DB 意图，再写对象；PUT 中断后任务读取并校验 SHA256，可恢复已成功但响应丢失的写入。删除先 tombstone 隐藏，再由 dispatcher 重试清理。API 与 Worker 共用作用域校验，Worker 在开始、检查点与发布前重新查询成员和客户授权。
+S03 在解析后使用固定版本的本地 BGE tokenizer/Embedding 建立 pgvector 与中文全文索引，完整 generation 原子发布后进入 `ready`。上传先保存原文件的 DB 意图，再写对象；PUT 中断后任务读取并校验 SHA256，可恢复已成功但响应丢失的写入。删除先 tombstone 隐藏，再由 dispatcher 重试清理。API 与 Worker 共用作用域校验，Worker 在开始、检查点与发布前重新查询成员和客户授权。
 
 检索在两路召回前应用同一授权范围，再融合、去重并返回来源。SPEC 第 9.2 节后续过滤用于进一步缩小候选，不得代替召回前权限过滤。
 
-中文关键词检索的分词与归一化方案须在 S03 用中文样例验证；不能将默认全文索引等同于已解决中文检索。扫描 PDF/OCR 不在当前明确承诺内，遇到无文本文件需给出明确提示。
+中文关键词检索使用 jieba 归一化后写入 PostgreSQL `simple` 配置，和 512 维语义召回通过 RRF 融合；30 条中文问题已完成实链路评测。MVP 使用精确向量扫描，规模增长并出现性能证据后再增加 HNSW。扫描 PDF/OCR 不在当前明确承诺内，遇到无文本文件需给出明确提示。
 
 ### 需求与方案
 
@@ -79,7 +79,7 @@ API 以 FastAPI OpenAPI 为实现契约，前端生成类型；SPEC 第 13 节�
 
 ## 运行与验证
 
-本地 Compose 基础设施和 Web/API/Worker 已验证；S01 通过 Alembic 创建组织、用户、成员、客户授权、客户和项目表。共享 application/access.py 负责授权范围；API 每次重新验证身份和成员。数据库组合外键加固组织一致性，尚未启用 RLS。Web 同源代理使用 HttpOnly cookie，写请求检查配置的 WEB_ORIGIN；生产 OIDC 真实供应商联调待完成。启动与验证命令见 README 和 docs/S01_VALIDATION.md。
+本地 Compose 基础设施和 Web/API/Worker 已验证；Alembic 已创建 S01 业务表、S02 文档任务表和 S03 pgvector/FTS 列。共享 application/access.py 负责授权范围；API 每次重新验证身份和成员，检索在候选生成前复用该范围。数据库组合外键加固组织一致性，尚未启用 RLS。Web 同源代理使用 HttpOnly cookie，写请求检查配置的 WEB_ORIGIN；生产 OIDC 真实供应商联调待完成。启动与各阶段证据见 README 和 `docs/*_VALIDATION.md`。
 
 每阶段检查自己的故障恢复和数据隔离。S09 统一运行完整演示、中文检索评测、跨客户隔离、工作流重启与导出检查。具体指标见 SPEC 第 18–22 节。
 

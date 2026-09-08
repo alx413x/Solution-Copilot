@@ -707,6 +707,8 @@ upload
 
 所有值均为可配置参数，最终以评测集结果为准。
 
+S03 实现补充（D009）：本地 `BAAI/bge-small-zh-v1.5` 固定 revision，Embedding 为 512 维；tokenizer 分块上限 440、重叠 80。中文关键词使用 jieba 归一化后写入 PostgreSQL `simple` 全文索引。两路各取 20 条，以 RRF 融合后返回 8 条，单文档默认最多 40%。MVP 使用精确向量扫描；模型 profile 变化后必须重建索引，旧 profile 不参与新查询。30 条固定中文问题的真实链路结果保存在 `evals/s03-results.json`。
+
 ### 9.3 检索结果结构
 
 ```json

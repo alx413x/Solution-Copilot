@@ -1,6 +1,6 @@
 # Solution Copilot
 
-面向售前工程师的可追溯方案工作台。当前已实现 S00 工程骨架、S01 客户项目管理和 S02 文档上传解析；下一阶段为 S03 检索索引。
+面向售前工程师的可追溯方案工作台。当前已实现 S00 工程骨架、S01 客户项目管理、S02 文档处理和 S03 知识检索；下一阶段为 S04 需求结构化。
 
 ## 本地启动
 
@@ -13,6 +13,7 @@ uv sync --frozen --group test
 docker compose --env-file .env -f infra/compose.yaml up -d --wait
 uv run python scripts/init_infra.py
 uv run alembic upgrade head
+uv run python -m scripts.prepare_embeddings  # 首次下载固定版本的本地检索模型
 DEV_AUTH_ENABLED=true uv run python scripts/seed_s01.py  # 首次生成本地演示身份
 DEV_AUTH_ENABLED=true uv run python scripts/dev.py
 ```
@@ -41,6 +42,7 @@ pnpm build
 uv run --group test python scripts/smoke.py
 uv run --group test python scripts/smoke_s01.py
 uv run --group test python -m scripts.smoke_s02
+uv run python -m scripts.eval_s03
 ```
 
 `/api/v1/health/live` 只检查 API 存活；`/api/v1/health/ready` 检查数据库及 vector 扩展、Redis、私有 bucket，可用为 200，不可用为 503，响应不包含异常或凭据。浏览器通过同源 `/api/health` 调用 API，API 地址只在 Web 服务端读取。
@@ -57,7 +59,7 @@ smoke 会向真实 Celery Worker 投递探针，验证 Worker 连接三项基础
 
 Python 使用 Ruff 检查和格式化；前端使用 TypeScript strict。精确依赖版本以 `uv.lock`、`pnpm-lock.yaml` 为准，未用到的模型/编辑器/解析器依赖不预装。依赖基线、变更及交接见 [SPEC](SPEC.md)、[DECISIONS](DECISIONS.md)、[STATUS](STATUS.md)。
 
-本阶段不包含模型调用或生产部署镜像。MinIO 使用已发布的固定社区镜像（AGPLv3）；生产对象存储选型与镜像维护需在部署前重新评估，当前 S3 接口保持可替换。
+S03 只在本机调用固定版本的 Embedding 模型，不包含托管生成模型调用或生产部署镜像。MinIO 使用已发布的固定社区镜像（AGPLv3）；生产对象存储选型与镜像维护需在部署前重新评估，当前 S3 接口保持可替换。
 
 本机代理或中断后残留进程问题、实际验收证据和已知限制见 [S00 验收记录](docs/S00_VALIDATION.md)。进行生产构建时建议先停止开发服务，构建后再启动。
 
@@ -79,13 +81,13 @@ Python 使用 Ruff 检查和格式化；前端使用 TypeScript strict。精确�
 - 从组织资料、客户档案或项目总览进入资料页。支持 UTF-8 TXT/Markdown、文本 PDF、DOCX；上传默认 25 MiB，`UPLOAD_MAX_BYTES` 可配置（最大 100 MiB，Web 与 API 使用相同配置）。扫描 PDF 请先 OCR。
 - 组织资料仅 owner 可写，成员可读；客户/项目资料沿用客户授权，viewer 与归档档案只读。暂不开放 public 跨组织知识。
 - 上传异步返回 document/job；页面每 3 秒刷新状态，可查看带章节、行号、页码或正文块序号的片段，失败可重试，处理可取消，解析完成后可重新解析。重复文件按组织与作用域去重。
-- `parsed` 表示解析完成；S03 完成向量/关键词索引后才标记 `ready`。当前使用字符切分，未调用模型，`token_count` 留空。
+- `parsed` 表示解析完成；真实 tokenizer 分块、向量与关键词索引成功后标记 `ready`。索引失败会保留上一完整 generation，并提供重建入口。
 - 原文件由每请求鉴权代理下载；停用立即禁止下载/分块读取，重新上传同内容可恢复。删除立即隐藏，dispatcher 持续补偿对象与分块清理。
 - 必须同时运行 dispatcher（`uv run python -m scripts.dispatch_jobs`）；它补偿入队失败、丢失投递和过期 Worker 租约。业务状态只读取 jobs，不能用 Celery RPC 结果替代。默认租约 300 秒、最多 3 次自动尝试；重试新建 generation，旧执行不能覆盖新结果。
 - 样本见 `docs/fixtures/s02-meeting.md`，验收及边界见 [S02 验收记录](docs/S02_VALIDATION.md)。
 
-## S03 进行中
+## S03 知识检索
 
-检索代码与新迁移已接入，真实模型与质量验收尚未完成，见 [S03 验证进度](docs/S03_VALIDATION.md)。新管线在分块后执行向量化，模型未准备时任务明确失败，不会假装 ready。旧开发进程尚未重启加载新管线。
+S03 使用本地 `BAAI/bge-small-zh-v1.5`（512 维）和 jieba 建立 PostgreSQL pgvector/全文双路索引。授权范围在两路候选生成前应用，结果经 RRF 融合、去重并保留原文定位。首次启动先运行 `uv run python -m scripts.prepare_embeddings`；运行期只读本地模型。30 条中文问题的 Hit@8 为 100%，MRR@8 为 0.901，HTTP P95 为 23.65 ms，详见 [S03 验收记录](docs/S03_VALIDATION.md)。
 
-DeepSeek 配置保存在根目录 `.env`：`MODEL_PROVIDER=deepseek`、`MODEL_BASE_URL=https://api.deepseek.com`、`MODEL_NAME` 和 `MODEL_API_KEY`。密钥只填入本地 `.env`，不提交、不粘贴到聊天；`.env.example` 仅描述配置项。DeepSeek 生成调用属于 S04，S03 的 Embedding 服务需另行确定。
+DeepSeek 生成配置从根目录 `.env` 读取 `MODEL_PROVIDER`、`MODEL_NAME` 和 `MODEL_API_KEY`；`MODEL_BASE_URL` 可选，默认使用 `.env.example` 中的官方地址。密钥只填入本地 `.env`，不提交、不粘贴到聊天。DeepSeek 生成调用属于 S04，与 S03 的本地 Embedding 分开。
