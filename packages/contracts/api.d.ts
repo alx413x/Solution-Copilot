@@ -282,6 +282,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/retrieval/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Retrieval */
+        post: operations["retrieval_api_v1_retrieval_search_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -515,6 +532,41 @@ export interface components {
             created_at: string;
             job?: components["schemas"]["JobView"] | null;
         };
+        /** Evidence */
+        Evidence: {
+            /**
+             * Chunk Id
+             * Format: uuid
+             */
+            chunk_id: string;
+            /**
+             * Document Id
+             * Format: uuid
+             */
+            document_id: string;
+            /** Title */
+            title: string;
+            /** Content */
+            content: string;
+            /** Page Number */
+            page_number: number | null;
+            /** Section Path */
+            section_path: string[];
+            /** Metadata */
+            metadata: {
+                [key: string]: unknown;
+            };
+            /** Generation */
+            generation: number;
+            /** Scope */
+            scope: string;
+            /** Score */
+            score: number;
+            /** Ranks */
+            ranks: {
+                [key: string]: number;
+            };
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -641,6 +693,45 @@ export interface components {
             description?: string | null;
             /** Version */
             version: number;
+        };
+        /** SearchInput */
+        SearchInput: {
+            /** Query */
+            query: string;
+            /** Customer Id */
+            customer_id?: string | null;
+            /** Project Id */
+            project_id?: string | null;
+            /** Scopes */
+            scopes?: ("organization" | "customer" | "project")[];
+            /** Mime Types */
+            mime_types?: string[];
+            /** Tags */
+            tags?: string[];
+            /**
+             * Top K
+             * @default 8
+             */
+            top_k: number;
+            /**
+             * Candidates
+             * @default 20
+             */
+            candidates: number;
+            /**
+             * Document Share
+             * @default 0.4
+             */
+            document_share: number;
+        };
+        /** SearchResult */
+        SearchResult: {
+            /** Query */
+            query: string;
+            /** Profile */
+            profile: string;
+            /** Items */
+            items: components["schemas"]["Evidence"][];
         };
         /** UploadView */
         UploadView: {
@@ -1412,6 +1503,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    retrieval_api_v1_retrieval_search_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SearchInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResult"];
                 };
             };
             /** @description Validation Error */

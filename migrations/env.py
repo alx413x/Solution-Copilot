@@ -5,6 +5,11 @@ from solution_copilot.infrastructure.database import get_engine
 if context.is_offline_mode():
     raise RuntimeError("Use an explicit database connection for migrations")
 with get_engine().connect() as connection:
-    context.configure(connection=connection, target_metadata=Base.metadata)
+    context.configure(
+        connection=connection,
+        target_metadata=Base.metadata,
+        version_table_schema=connection.dialect.default_schema_name,
+        include_name=lambda name, kind, parents: name != "alembic_version",
+    )
     with context.begin_transaction():
         context.run_migrations()

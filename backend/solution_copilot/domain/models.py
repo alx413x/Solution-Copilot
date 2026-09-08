@@ -1,16 +1,18 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     String,
     UniqueConstraint,
     func,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import DeclarativeBase, Mapped, foreign, mapped_column, relationship
 
 
@@ -169,6 +171,9 @@ class DocumentChunk(Record, Base):
     generation: Mapped[int] = mapped_column()
     content: Mapped[str] = mapped_column()
     token_count: Mapped[int | None] = mapped_column()
+    embedding: Mapped[list[float] | None] = mapped_column(Vector())
+    embedding_profile: Mapped[str | None] = mapped_column(String(200))
+    search_vector: Mapped[str | None] = mapped_column(TSVECTOR)
     page_number: Mapped[int | None] = mapped_column()
     section_path: Mapped[list] = mapped_column(JSONB)
     data: Mapped[dict] = mapped_column("metadata", JSONB)
@@ -177,6 +182,7 @@ class DocumentChunk(Record, Base):
             ["organization_id", "document_id"], ["documents.organization_id", "documents.id"]
         ),
         UniqueConstraint("document_id", "generation", "ordinal"),
+        Index("ix_chunks_search_vector", "search_vector", postgresql_using="gin"),
     )
 
 

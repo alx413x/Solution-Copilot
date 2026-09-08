@@ -19,6 +19,9 @@ from test_s01 import setup as setup
 
 @pytest.fixture(autouse=True)
 def objects(monkeypatch):
+    monkeypatch.setattr(
+        "solution_copilot.infrastructure.embeddings.index_chunks", lambda chunks, checkpoint: chunks
+    )
     values = {}
     monkeypatch.setattr(storage, "put_original", lambda key, data, mime: values.update({key: data}))
     monkeypatch.setattr(storage, "read_original", lambda key: values[key])
@@ -70,7 +73,7 @@ def test_four_formats_and_idempotency(setup, db, extension):
     document_jobs.run_job(job_id)
     document_jobs.run_job(job_id)
     response = client.get(f"/api/v1/documents/{doc_id}", headers=h()).json()
-    assert response["status"] == "parsed", response
+    assert response["status"] == "ready", response
     values = client.get(f"/api/v1/documents/{doc_id}/chunks", headers=h()).json()["items"]
     assert len({c["id"] for c in values}) == len(values) > 0
     assert all(c["generation"] == 1 for c in values)

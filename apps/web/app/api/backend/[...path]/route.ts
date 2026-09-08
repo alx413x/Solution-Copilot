@@ -10,7 +10,9 @@ async function proxy(
     );
   const { path } = await context.params;
   if (
-    !["customers", "projects", "documents", "jobs"].includes(path[0]) ||
+    !["customers", "projects", "documents", "jobs", "retrieval"].includes(
+      path[0],
+    ) ||
     path.some((p) => !/^[-a-zA-Z0-9]+$/.test(p))
   )
     return Response.json({}, { status: 404 });

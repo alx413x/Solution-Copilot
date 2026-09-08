@@ -83,3 +83,9 @@ Python 使用 Ruff 检查和格式化；前端使用 TypeScript strict。精确�
 - 原文件由每请求鉴权代理下载；停用立即禁止下载/分块读取，重新上传同内容可恢复。删除立即隐藏，dispatcher 持续补偿对象与分块清理。
 - 必须同时运行 dispatcher（`uv run python -m scripts.dispatch_jobs`）；它补偿入队失败、丢失投递和过期 Worker 租约。业务状态只读取 jobs，不能用 Celery RPC 结果替代。默认租约 300 秒、最多 3 次自动尝试；重试新建 generation，旧执行不能覆盖新结果。
 - 样本见 `docs/fixtures/s02-meeting.md`，验收及边界见 [S02 验收记录](docs/S02_VALIDATION.md)。
+
+## S03 进行中
+
+检索代码与新迁移已接入，真实模型与质量验收尚未完成，见 [S03 验证进度](docs/S03_VALIDATION.md)。新管线在分块后执行向量化，模型未准备时任务明确失败，不会假装 ready。旧开发进程尚未重启加载新管线。
+
+DeepSeek 配置保存在根目录 `.env`：`MODEL_PROVIDER=deepseek`、`MODEL_BASE_URL=https://api.deepseek.com`、`MODEL_NAME` 和 `MODEL_API_KEY`。密钥只填入本地 `.env`，不提交、不粘贴到聊天；`.env.example` 仅描述配置项。DeepSeek 生成调用属于 S04，S03 的 Embedding 服务需另行确定。

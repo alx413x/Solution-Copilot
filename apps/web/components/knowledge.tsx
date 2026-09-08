@@ -16,6 +16,7 @@ import {
 } from "../lib/client";
 import { useRole } from "./shell";
 import { DocumentPreview } from "./document-preview";
+import { Retrieval } from "./retrieval";
 
 const statuses: Record<string, string> = {
   uploaded: "等待处理",
@@ -129,6 +130,13 @@ export function Knowledge({
         </p>
       )}
       {archived && <p className="notice">所属档案已归档，资料仅供查阅。</p>}
+      {(scope === "organization" || parent.data) && (
+        <Retrieval
+          key={`${scope}-${id}`}
+          customerId={customerId}
+          projectId={scope === "project" ? id : undefined}
+        />
+      )}
       {writable && (
         <form
           className="panel record-form"
@@ -259,12 +267,12 @@ export function Knowledge({
                       取消处理
                     </button>
                   )}
-                {writable && doc.status === "parsed" && (
+                {writable && ["parsed", "ready"].includes(doc.status) && (
                   <button
                     disabled={busy}
                     onClick={() => action(`documents/${doc.id}/reindex`)}
                   >
-                    重新解析
+                    重建索引
                   </button>
                 )}
                 {writable && (

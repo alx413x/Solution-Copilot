@@ -13,7 +13,7 @@ from solution_copilot.application.errors import AppError
 from solution_copilot.application.parsing import chunks, validate_file
 from solution_copilot.config import get_settings
 from solution_copilot.domain.models import Document, DocumentChunk, Job
-from solution_copilot.infrastructure import database
+from solution_copilot.infrastructure import database, embeddings
 from solution_copilot.infrastructure import documents as storage
 
 
@@ -91,6 +91,14 @@ def run_job(job_id):
         extension, _ = validate_file(title, mime, data)
         # Checkpoints between blocks, no persisted partial chunks.
         result = chunks(data, extension, checkpoint)
+        with Session(database.get_engine()) as session:
+            doc, job = locked_pair(session, job_id)
+            if job.status != "running" or job.attempts != attempt:
+                raise Cancelled()
+            authorize(session, doc, job)
+            doc.status = "indexing"
+            session.commit()
+        result = embeddings.index_chunks(result, checkpoint)
         checkpoint(80)
         with Session(database.get_engine()) as session:
             doc, job = locked_pair(session, job_id)
@@ -109,8 +117,13 @@ def run_job(job_id):
                     for chunk in result
                 ]
             )
-            doc.generation, doc.status = job.generation, "parsed"
-            doc.data = {**doc.data, "storage_ready": True, "chunk_count": len(result)}
+            doc.generation, doc.status = job.generation, "ready"
+            doc.data = {
+                **doc.data,
+                "storage_ready": True,
+                "chunk_count": len(result),
+                "embedding_profile": embeddings.PROFILE,
+            }
             doc.error_code = doc.error_message = None
             job.status, job.progress, job.lease_until = "succeeded", 100, None
             job.error_code = job.error_message = None

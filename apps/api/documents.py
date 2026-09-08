@@ -248,7 +248,11 @@ def cancel(job_id: UUID, session: SessionDep, identity: IdentityDep):
     doc, job = job_access(session, identity, job_id, write=True)
     if job.status in {"queued", "running"}:
         job.status, job.lease_until = "cancelled", None
-        doc.status = "parsed" if doc.generation else "failed"
+        doc.status = (
+            ("ready" if doc.data.get("embedding_profile") else "parsed")
+            if doc.generation
+            else "failed"
+        )
         doc.error_code, doc.error_message = "CANCELLED", "处理已取消，可重试。"
         session.commit()
     return job

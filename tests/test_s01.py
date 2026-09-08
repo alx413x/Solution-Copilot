@@ -32,7 +32,7 @@ def db(monkeypatch):
     schema = "s01_test_" + uuid4().hex
     with engine.begin() as connection:
         connection.execute(text(f"CREATE SCHEMA {schema}"))
-    isolated = create_engine(engine.url, connect_args={"options": f"-csearch_path={schema}"})
+    isolated = create_engine(engine.url, connect_args={"options": f"-csearch_path={schema},public"})
     monkeypatch.setattr("solution_copilot.infrastructure.database.get_engine", lambda: isolated)
     try:
         command.upgrade(Config("alembic.ini"), "head")
@@ -294,11 +294,12 @@ def test_migration_round_trip(db):
     from sqlalchemy import inspect
 
     config = Config("alembic.ini")
-    assert "projects" in inspect(db.bind).get_table_names()
+    schema = db.bind.dialect.default_schema_name
+    assert "projects" in inspect(db.bind).get_table_names(schema=schema)
     command.downgrade(config, "base")
-    assert "projects" not in inspect(db.bind).get_table_names()
+    assert "projects" not in inspect(db.bind).get_table_names(schema=schema)
     command.upgrade(config, "head")
-    assert "customer_access" in inspect(db.bind).get_table_names()
+    assert "customer_access" in inspect(db.bind).get_table_names(schema=schema)
 
 
 def test_development_auth_is_opt_in():

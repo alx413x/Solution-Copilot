@@ -12,3 +12,4 @@ __pycache__/
 
 .local/
 apps/web/next-env.d.ts
+:memory:.ses
