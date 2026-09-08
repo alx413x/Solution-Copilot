@@ -34,6 +34,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           >
             项目
           </Link>
+          <Link
+            href="/knowledge"
+            aria-current={pathname === "/knowledge" ? "page" : undefined}
+          >
+            组织资料
+          </Link>
           <Link href="/">服务状态</Link>
         </nav>
         <div className="account">

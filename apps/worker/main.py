@@ -10,7 +10,15 @@ app.conf.update(
     accept_content=["json"],
     task_ignore_result=True,
     broker_connection_retry_on_startup=True,
+    broker_connection_timeout=2,
 )
+
+
+@app.task(name="documents.parse", acks_late=True, reject_on_worker_lost=True)
+def parse_document(job_id):
+    from solution_copilot.application.document_jobs import run_job
+
+    run_job(job_id)
 
 
 @app.task(name="system.check_infrastructure")

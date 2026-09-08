@@ -529,7 +529,7 @@ collecting → researching → drafting → reviewing → completed
 - `mime_type`
 - `storage_key`
 - `sha256`
-- `status: uploaded/parsing/indexing/ready/failed/disabled`
+- `status: uploaded/parsing/parsed/indexing/ready/failed/disabled`（S02 解析完成为 parsed，S03 索引后为 ready）
 - `metadata: jsonb`
 - `error_code: varchar | null`
 - `error_message: text | null`
@@ -544,7 +544,7 @@ collecting → researching → drafting → reviewing → completed
 - `project_id: uuid | null`
 - `ordinal`
 - `content`
-- `token_count`
+- `token_count`（S02 留空；字符数与字符切分参数见 metadata，S03 接入真实 tokenizer）
 - `page_number: integer | null`
 - `section_path: jsonb`
 - `embedding: vector`
@@ -552,6 +552,8 @@ collecting → researching → drafting → reviewing → completed
 - `metadata: jsonb`
 
 向量维度由所选 Embedding 模型决定，迁移时不得硬编码与模型不匹配的维度。
+
+S02 实现补充（D015）：Chunk 客户/项目范围通过 document 联结；向量和全文索引列由 S03 引入。文档 generation 与分块 generation 原子切换，当前不保存历史引用。新增 `GET /documents/{id}/chunks`、`GET /documents/{id}/download`；reindex 在 S02 执行重新解析，S03 扩展索引。
 
 ### 7.6 方案与引用
 

@@ -7,6 +7,34 @@
   --accent: #12604c;
   --warning: #925119;
 }
+.document h2 {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.document .heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.document > button,
+.document .actions {
+  margin-top: 1rem;
+}
+.chunk {
+  border-top: 1px solid var(--line);
+  padding: 1rem 0;
+}
+.chunk pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+input[type="file"] {
+  min-width: 0;
+  max-width: 100%;
+}
+nav {
+  flex-wrap: wrap;
+}
 * {
   box-sizing: border-box;
 }

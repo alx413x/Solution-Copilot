@@ -9,6 +9,8 @@ from solution_copilot.config import get_settings
 from solution_copilot.infrastructure.health import HealthReport, readiness
 
 from apps.api.customers import router
+from apps.api.documents import router as documents_router
+from apps.api.upload_limit import UploadLimit
 
 
 @asynccontextmanager
@@ -19,6 +21,8 @@ async def lifespan(app):
 
 app = FastAPI(title="Solution Copilot API", version="0.2.0", lifespan=lifespan)
 app.include_router(router)
+app.include_router(documents_router)
+app.add_middleware(UploadLimit)
 
 
 def error_response(status, code, message):

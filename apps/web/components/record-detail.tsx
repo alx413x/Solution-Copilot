@@ -181,14 +181,18 @@ export function RecordDetail({
               </p>
               <p className="muted">
                 当前阶段：{record.status === "archived" ? "已归档" : "需求收集"}
-                。材料导入将在 S02 接入。
+                。
               </p>
+              <Link href={`/projects/${id}/knowledge`}>管理项目资料 →</Link>
             </>
           )}
         </div>
       )}
       {kind === "customers" && (
-        <RecordList kind="projects" customerId={id} canCreate={!archived} />
+        <>
+          <Link href={`/customers/${id}/knowledge`}>管理客户资料 →</Link>
+          <RecordList kind="projects" customerId={id} canCreate={!archived} />
+        </>
       )}
     </div>
   );

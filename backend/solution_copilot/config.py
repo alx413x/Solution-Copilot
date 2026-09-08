@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     s3_secret_key: SecretStr
     s3_bucket: str = "solution-copilot"
     s3_region: str = "us-east-1"
+    upload_max_bytes: int = Field(25 * 1024 * 1024, ge=1, le=100 * 1024 * 1024)
+    document_max_chars: int = Field(2_000_000, ge=1, le=10_000_000)
+    job_lease_seconds: int = Field(300, ge=10, le=3600)
+    job_max_attempts: int = Field(3, ge=1, le=10)
 
 
 @lru_cache

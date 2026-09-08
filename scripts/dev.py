@@ -12,6 +12,7 @@ from dotenv import dotenv_values
 os.chdir(Path(__file__).resolve().parents[1])
 env = {**{k: v for k, v in dotenv_values(".env").items() if v is not None}, **os.environ}
 commands = [
+    [sys.executable, "-m", "scripts.dispatch_jobs"],
     [sys.executable, "-m", "uvicorn", "apps.api.main:app", "--host", "127.0.0.1", "--port", "8000"],
     [
         sys.executable,

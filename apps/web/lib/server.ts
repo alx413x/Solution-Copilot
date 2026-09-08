@@ -18,7 +18,10 @@ export async function upstream(
   token?: string,
 ) {
   const jar = await cookies();
-  const headers = new Headers({ "Content-Type": "application/json" });
+  const headers = new Headers({
+    "Content-Type":
+      new Headers(init.headers).get("Content-Type") ?? "application/json",
+  });
   const credential = token ?? jar.get("sc_token")?.value;
   if (credential) headers.set("Authorization", `Bearer ${credential}`);
   const org = jar.get("sc_org")?.value;
@@ -29,7 +32,7 @@ export async function upstream(
       ...init,
       headers,
       cache: "no-store",
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(60000),
       redirect: "error",
     },
   );

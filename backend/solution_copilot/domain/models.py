@@ -114,3 +114,94 @@ class Project(Record, Base):
             "status IN ('collecting','researching','drafting','reviewing','completed','archived')"
         ),
     )
+
+
+class Document(Record, Base):
+    __tablename__ = "documents"
+    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id"), index=True)
+    customer_id: Mapped[UUID | None] = mapped_column()
+    project_id: Mapped[UUID | None] = mapped_column()
+    scope: Mapped[str] = mapped_column(String(20))
+    title: Mapped[str] = mapped_column(String(255))
+    source_type: Mapped[str] = mapped_column(String(20), default="upload")
+    mime_type: Mapped[str] = mapped_column(String(100))
+    storage_key: Mapped[str] = mapped_column(String(255), unique=True)
+    sha256: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(20), default="uploaded")
+    data: Mapped[dict] = mapped_column("metadata", JSONB, default=dict)
+    error_code: Mapped[str | None] = mapped_column(String(64))
+    error_message: Mapped[str | None] = mapped_column()
+    generation: Mapped[int] = mapped_column(default=0)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (
+        UniqueConstraint("organization_id", "id"),
+        UniqueConstraint(
+            "organization_id",
+            "sha256",
+            "scope",
+            "customer_id",
+            "project_id",
+            name="uq_document_content_scope",
+            postgresql_nulls_not_distinct=True,
+        ),
+        ForeignKeyConstraint(
+            ["organization_id", "customer_id"], ["customers.organization_id", "customers.id"]
+        ),
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        CheckConstraint(
+            "(scope = 'organization' AND customer_id IS NULL AND project_id IS NULL) OR "
+            "(scope = 'customer' AND customer_id IS NOT NULL AND project_id IS NULL) OR "
+            "(scope = 'project' AND customer_id IS NOT NULL AND project_id IS NOT NULL)"
+        ),
+        CheckConstraint(
+            "status IN ('uploaded','parsing','parsed','indexing','ready','failed','disabled')"
+        ),
+    )
+
+
+class DocumentChunk(Record, Base):
+    __tablename__ = "document_chunks"
+    organization_id: Mapped[UUID] = mapped_column()
+    document_id: Mapped[UUID] = mapped_column(index=True)
+    ordinal: Mapped[int] = mapped_column()
+    generation: Mapped[int] = mapped_column()
+    content: Mapped[str] = mapped_column()
+    token_count: Mapped[int | None] = mapped_column()
+    page_number: Mapped[int | None] = mapped_column()
+    section_path: Mapped[list] = mapped_column(JSONB)
+    data: Mapped[dict] = mapped_column("metadata", JSONB)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "document_id"], ["documents.organization_id", "documents.id"]
+        ),
+        UniqueConstraint("document_id", "generation", "ordinal"),
+    )
+
+
+class Job(Record, Base):
+    __tablename__ = "jobs"
+    organization_id: Mapped[UUID] = mapped_column()
+    resource_id: Mapped[UUID] = mapped_column(index=True)
+    actor_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    job_type: Mapped[str] = mapped_column(String(40), default="document.parse")
+    resource_type: Mapped[str] = mapped_column(String(20), default="document")
+    status: Mapped[str] = mapped_column(String(20), default="queued", index=True)
+    progress: Mapped[int] = mapped_column(default=0)
+    attempts: Mapped[int] = mapped_column(default=0)
+    generation: Mapped[int] = mapped_column()
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    dispatch_after: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    error_code: Mapped[str | None] = mapped_column(String(64))
+    error_message: Mapped[str | None] = mapped_column()
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "resource_id"], ["documents.organization_id", "documents.id"]
+        ),
+        UniqueConstraint("resource_id", "generation"),
+        CheckConstraint("status IN ('queued','running','succeeded','failed','cancelled')"),
+        CheckConstraint("progress BETWEEN 0 AND 100"),
+    )
