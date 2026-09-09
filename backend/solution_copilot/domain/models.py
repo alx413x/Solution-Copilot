@@ -11,6 +11,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import DeclarativeBase, Mapped, foreign, mapped_column, relationship
@@ -183,6 +184,49 @@ class DocumentChunk(Record, Base):
         ),
         UniqueConstraint("document_id", "generation", "ordinal"),
         Index("ix_chunks_search_vector", "search_vector", postgresql_using="gin"),
+    )
+
+
+class RequirementProfile(Record, Base):
+    __tablename__ = "requirement_profiles"
+    organization_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID] = mapped_column(unique=True)
+    version: Mapped[int] = mapped_column(default=1)
+    summary: Mapped[str] = mapped_column(default="")
+    summary_edited: Mapped[bool] = mapped_column(default=False)
+    # ponytail: atomic project-sized JSON; normalize items if profiles outgrow 200 items.
+    items: Mapped[list] = mapped_column(JSONB, default=list)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    confirmed_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+    )
+
+
+class RequirementExtraction(Record, Base):
+    __tablename__ = "requirement_extractions"
+    organization_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID] = mapped_column(index=True)
+    actor_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    status: Mapped[str] = mapped_column(String(20), default="queued")
+    attempts: Mapped[int] = mapped_column(default=0)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    payload: Mapped[dict] = mapped_column(JSONB)
+    model_info: Mapped[dict] = mapped_column(JSONB, default=dict)
+    error_message: Mapped[str | None] = mapped_column()
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        CheckConstraint("status IN ('queued','running','succeeded','failed','cancelled')"),
+        Index(
+            "uq_active_requirement_extraction",
+            "project_id",
+            unique=True,
+            postgresql_where=text("status IN ('queued','running')"),
+        ),
     )
 
 

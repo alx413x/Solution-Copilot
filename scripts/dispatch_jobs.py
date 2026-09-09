@@ -4,6 +4,7 @@ import logging
 import time
 
 from solution_copilot.application.document_jobs import dispatch_once
+from solution_copilot.application.requirement_jobs import dispatch_once as dispatch_requirements
 
 from apps.worker.main import app
 
@@ -16,6 +17,12 @@ def main():
             )
         except Exception:
             logging.warning("Document dispatcher unavailable; will retry (details suppressed).")
+        try:
+            dispatch_requirements(
+                lambda job_id: app.send_task("requirements.extract", args=[job_id], retry=False)
+            )
+        except Exception:
+            logging.warning("Requirement dispatcher unavailable; will retry (details suppressed).")
         time.sleep(2)
 
 

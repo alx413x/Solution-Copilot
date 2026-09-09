@@ -856,6 +856,8 @@ build_retrieval_queries → retrieve_evidence → draft_outline
 
 ### 11.4 完整度
 
+S04 实现契约（D016）：需求项以稳定 UUID 保存于项目唯一档案 JSONB，最多 200 项；暂不单独建 requirement_items 表。PATCH 携带档案 version，可指定 item_id 与 item/status/resolve_with，或修改 summary；冲突只能显式 keep/replace。提取接受 text 与 document_ids，返回持久化 extraction；GET 档案包含最新任务、missing_categories 和来源快照。POST `/projects/{project_id}/requirements/extractions/{extraction_id}/cancel` 可取消活动提取。消息来源与澄清回答在 S05 接入。提取期间档案变化则拒绝发布，不自动重放覆盖人工修改。
+
 完整度用于辅助追问，按项目模板配置权重。默认必备类别：
 
 - 客户背景

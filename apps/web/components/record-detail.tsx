@@ -184,6 +184,11 @@ export function RecordDetail({
                 。
               </p>
               <Link href={`/projects/${id}/knowledge`}>管理项目资料 →</Link>
+              <p>
+                <Link href={`/projects/${id}/requirements`}>
+                  查看需求档案 →
+                </Link>
+              </p>
             </>
           )}
         </div>

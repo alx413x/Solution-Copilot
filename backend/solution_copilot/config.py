@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     document_max_chars: int = Field(2_000_000, ge=1, le=10_000_000)
     job_lease_seconds: int = Field(300, ge=10, le=3600)
     job_max_attempts: int = Field(3, ge=1, le=10)
+    model_provider: str = "deepseek"
+    model_base_url: str = "https://api.deepseek.com"
+    model_name: str = ""
+    model_api_key: SecretStr = SecretStr("")
 
 
 @lru_cache

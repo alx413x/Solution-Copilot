@@ -1,6 +1,6 @@
 # Solution Copilot
 
-面向售前工程师的可追溯方案工作台。当前已实现 S00 工程骨架、S01 客户项目管理、S02 文档处理和 S03 知识检索；下一阶段为 S04 需求结构化。
+面向售前工程师的可追溯方案工作台。当前已实现 S00–S03 基础与检索，以及 S04 需求结构化；下一阶段为 S05 澄清与对话。
 
 ## 本地启动
 
@@ -90,4 +90,12 @@ S03 只在本机调用固定版本的 Embedding 模型，不包含托管生成�
 
 S03 使用本地 `BAAI/bge-small-zh-v1.5`（512 维）和 jieba 建立 PostgreSQL pgvector/全文双路索引。授权范围在两路候选生成前应用，结果经 RRF 融合、去重并保留原文定位。首次启动先运行 `uv run python -m scripts.prepare_embeddings`；运行期只读本地模型。30 条中文问题的 Hit@8 为 100%，MRR@8 为 0.901，HTTP P95 为 23.65 ms，详见 [S03 验收记录](docs/S03_VALIDATION.md)。
 
-DeepSeek 生成配置从根目录 `.env` 读取 `MODEL_PROVIDER`、`MODEL_NAME` 和 `MODEL_API_KEY`；`MODEL_BASE_URL` 可选，默认使用 `.env.example` 中的官方地址。密钥只填入本地 `.env`，不提交、不粘贴到聊天。DeepSeek 生成调用属于 S04，与 S03 的本地 Embedding 分开。
+DeepSeek 生成配置从根目录 `.env` 读取 `MODEL_PROVIDER`、`MODEL_NAME` 和 `MODEL_API_KEY`；`MODEL_BASE_URL` 可选，默认使用 `.env.example` 中的官方地址。密钥只填入本地 `.env`，不提交、不粘贴到聊天。S04 已接入生成调用，与 S03 的本地 Embedding 分开。
+
+## S04 需求档案
+
+从项目总览进入“需求档案”，可输入会议纪要或选择组织/当前客户/当前项目的已解析资料，提交异步提取任务。所选内容与既有需求将发送到配置的 DeepSeek 服务；页面说明这一行为。需保持 Worker 和 dispatcher 运行，首次更新运行 `uv run alembic upgrade head` 并重启服务。
+
+按类别核对需求和来源，支持手动新增、编辑、确认、拒绝。新信息与旧项冲突时，显式选择保留原项或采用新项，解决所有冲突后才能确认整个档案。提取不会覆盖人工内容；期间有人编辑时结果停止发布，可重新提取。失败、取消和进程恢复均从数据库读取状态。
+
+单次输入最多 30000 字、10 份资料和 200 个片段，每个档案最多 200 项。完整度只表示八类需求的覆盖情况，具体缺失项始终可见。真实合成样例验证运行 `uv run --group test python -m scripts.smoke_s04`，会调用配置的模型并保留演示项目；验收证据和边界见 [S04 验收记录](docs/S04_VALIDATION.md)。

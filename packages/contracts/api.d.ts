@@ -299,6 +299,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/requirements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Profile */
+        get: operations["profile_api_v1_projects__project_id__requirements_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Edit */
+        patch: operations["edit_api_v1_projects__project_id__requirements_patch"];
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/requirements/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm */
+        post: operations["confirm_api_v1_projects__project_id__requirements_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/requirements/extractions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Extract */
+        post: operations["extract_api_v1_projects__project_id__requirements_extractions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/requirements/extractions/{extraction_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel */
+        post: operations["cancel_api_v1_projects__project_id__requirements_extractions__extraction_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -383,6 +452,11 @@ export interface components {
             metadata: {
                 [key: string]: unknown;
             };
+        };
+        /** ConfirmInput */
+        ConfirmInput: {
+            /** Version */
+            version: number;
         };
         /** CustomerCreate */
         CustomerCreate: {
@@ -532,6 +606,20 @@ export interface components {
             created_at: string;
             job?: components["schemas"]["JobView"] | null;
         };
+        /** EditInput */
+        EditInput: {
+            /** Version */
+            version: number;
+            /** Item Id */
+            item_id?: string | null;
+            item?: components["schemas"]["ItemInput"] | null;
+            /** Status */
+            status?: ("confirmed" | "rejected") | null;
+            /** Summary */
+            summary?: string | null;
+            /** Resolve With */
+            resolve_with?: ("keep" | "replace") | null;
+        };
         /** Evidence */
         Evidence: {
             /**
@@ -567,6 +655,34 @@ export interface components {
                 [key: string]: number;
             };
         };
+        /** ExtractionInput */
+        ExtractionInput: {
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+            /** Document Ids */
+            document_ids?: string[];
+        };
+        /** ExtractionView */
+        ExtractionView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Status */
+            status: string;
+            /** Attempts */
+            attempts: number;
+            /** Error Message */
+            error_message: string | null;
+            /** Model Info */
+            model_info: {
+                [key: string]: unknown;
+            };
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -583,6 +699,60 @@ export interface components {
             services: {
                 [key: string]: "ok" | "unavailable";
             };
+        };
+        /** ItemInput */
+        ItemInput: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "background" | "pain_point" | "goal" | "functional" | "non_functional" | "integration" | "data" | "security_compliance" | "constraint" | "timeline_budget" | "acceptance_metric" | "risk";
+            /** Title */
+            title: string;
+            /** Content */
+            content: string;
+            /**
+             * Priority
+             * @default unknown
+             * @enum {string}
+             */
+            priority: "must" | "should" | "could" | "unknown";
+        };
+        /** ItemView */
+        ItemView: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "background" | "pain_point" | "goal" | "functional" | "non_functional" | "integration" | "data" | "security_compliance" | "constraint" | "timeline_budget" | "acceptance_metric" | "risk";
+            /** Title */
+            title: string;
+            /** Content */
+            content: string;
+            /**
+             * Priority
+             * @default unknown
+             * @enum {string}
+             */
+            priority: "must" | "should" | "could" | "unknown";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "proposed" | "confirmed" | "rejected" | "conflicted";
+            /** Confidence */
+            confidence: number | null;
+            /** Sources */
+            sources: components["schemas"]["SourceView"][];
+            /** Edited */
+            edited: boolean;
+            /** Conflicts With */
+            conflicts_with: string[];
         };
         /** JobView */
         JobView: {
@@ -617,6 +787,29 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** ProfileView */
+        ProfileView: {
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /** Version */
+            version: number;
+            /** Summary */
+            summary: string;
+            /** Items */
+            items: components["schemas"]["ItemView"][];
+            /** Completeness Score */
+            completeness_score: number;
+            /** Missing Categories */
+            missing_categories: string[];
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /** Writable */
+            writable: boolean;
+            extraction: components["schemas"]["ExtractionView"] | null;
         };
         /** ProjectCreate */
         ProjectCreate: {
@@ -732,6 +925,32 @@ export interface components {
             profile: string;
             /** Items */
             items: components["schemas"]["Evidence"][];
+        };
+        /** SourceView */
+        SourceView: {
+            /** Source Id */
+            source_id: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "document" | "user";
+            /** Quote */
+            quote: string;
+            /** Document Id */
+            document_id?: string | null;
+            /** Title */
+            title: string;
+            /** Generation */
+            generation?: number | null;
+            /** Page Number */
+            page_number?: number | null;
+            /** Section Path */
+            section_path?: string[];
+            /** Line Start */
+            line_start?: number | null;
+            /** Line End */
+            line_end?: number | null;
         };
         /** UploadView */
         UploadView: {
@@ -1538,6 +1757,184 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SearchResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    profile_api_v1_projects__project_id__requirements_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_api_v1_projects__project_id__requirements_patch: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EditInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_api_v1_projects__project_id__requirements_confirm_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    extract_api_v1_projects__project_id__requirements_extractions_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExtractionInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cancel_api_v1_projects__project_id__requirements_extractions__extraction_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                project_id: string;
+                extraction_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractionView"];
                 };
             };
             /** @description Validation Error */

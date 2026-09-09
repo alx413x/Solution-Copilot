@@ -1,0 +1,265 @@
+{
+  "prompt_version": "s04-v1",
+  "project_id": "cbf96c50-8ac6-4b01-84ff-c6e75d3b7afa",
+  "input": "示例制造企业有三个工厂，现有资料分散在多个系统，查找困难。目标是建立统一项目资料工作台。必须支持单点登录和资料上传。需要对接现有 ERP 系统。客户资料必须按客户隔离。部署必须使用客户现有服务器。预算上限 100 万元。验收时需验证未授权用户无法读取其他客户资料。",
+  "elapsed_seconds": 7.24,
+  "profile": {
+    "project_id": "cbf96c50-8ac6-4b01-84ff-c6e75d3b7afa",
+    "version": 2,
+    "summary": "本次输入涉及背景、目标、功能、集成、安全合规、约束、预算和验收指标，共提取8项候选需求。",
+    "items": [
+      {
+        "category": "background",
+        "title": "资料分散在多个系统",
+        "content": "示例制造企业有三个工厂，现有资料分散在多个系统，查找困难。",
+        "priority": "unknown",
+        "id": "aa8bf877-dd43-4b0a-ba8b-6de00aa81e6f",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "示例制造企业有三个工厂，现有资料分散在多个系统，查找困难。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "goal",
+        "title": "建立统一项目资料工作台",
+        "content": "目标是建立统一项目资料工作台。",
+        "priority": "unknown",
+        "id": "25827f48-8486-4c5f-b264-59114f4cb0e7",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "目标是建立统一项目资料工作台。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "security_compliance",
+        "title": "支持单点登录",
+        "content": "必须支持单点登录。",
+        "priority": "must",
+        "id": "1e2e3c4c-ca09-4911-b9df-bedfaaadec1b",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "必须支持单点登录和资料上传。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "functional",
+        "title": "支持资料上传",
+        "content": "必须支持资料上传。",
+        "priority": "must",
+        "id": "061d845e-bf7e-485e-aeaa-1cc62134e452",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "必须支持单点登录和资料上传。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "integration",
+        "title": "对接现有ERP系统",
+        "content": "需要对接现有 ERP 系统。",
+        "priority": "should",
+        "id": "fa4b3bb4-e6f7-4c5f-8a68-61ff52b84e88",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "需要对接现有 ERP 系统。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "security_compliance",
+        "title": "客户资料按客户隔离",
+        "content": "客户资料必须按客户隔离。",
+        "priority": "must",
+        "id": "e8c27923-0386-4043-bd37-64dc3818722f",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "客户资料必须按客户隔离。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "constraint",
+        "title": "部署使用客户现有服务器",
+        "content": "部署必须使用客户现有服务器。",
+        "priority": "must",
+        "id": "aba9eacf-f4d1-479e-837a-95f1e12410b2",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "部署必须使用客户现有服务器。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "timeline_budget",
+        "title": "预算上限100万元",
+        "content": "预算上限 100 万元。",
+        "priority": "must",
+        "id": "0a1659f2-cc18-49de-b4d8-33b7917de224",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "预算上限 100 万元。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "acceptance_metric",
+        "title": "验收时验证未授权用户无法读取其他客户资料",
+        "content": "验收时需验证未授权用户无法读取其他客户资料。",
+        "priority": "unknown",
+        "id": "c6104b65-b7a0-40f3-80a8-7f16a2046ee0",
+        "status": "confirmed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "text",
+            "type": "user",
+            "quote": "验收时需验证未授权用户无法读取其他客户资料。",
+            "document_id": null,
+            "title": "本次输入",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      }
+    ],
+    "completeness_score": 87.5,
+    "missing_categories": [
+      "pain_point"
+    ],
+    "confirmed_at": "2026-09-09T02:53:32.412066Z",
+    "writable": true,
+    "extraction": {
+      "id": "20347e41-1f72-4254-b843-037ff5a20862",
+      "status": "succeeded",
+      "attempts": 1,
+      "error_message": null,
+      "model_info": {
+        "model": "deepseek-v4-flash-vision-exp",
+        "usage": {
+          "total_tokens": 1371,
+          "prompt_tokens": 776,
+          "completion_tokens": 595,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 776
+        },
+        "provider": "deepseek",
+        "prompt_version": "s04-v1"
+      }
+    }
+  }
+}

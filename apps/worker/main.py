@@ -21,6 +21,13 @@ def parse_document(job_id):
     run_job(job_id)
 
 
+@app.task(name="requirements.extract", acks_late=True, reject_on_worker_lost=True)
+def extract_requirements(job_id):
+    from solution_copilot.application.requirement_jobs import run_job
+
+    run_job(job_id)
+
+
 @app.task(name="system.check_infrastructure")
 def check_infrastructure():
     report = readiness()

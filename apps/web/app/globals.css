@@ -227,7 +227,8 @@ small {
   gap: 0.5rem;
   font-weight: 600;
 }
-.record-form input,
+.record-form input:not([type="checkbox"]),
+.record-form select,
 .record-form textarea {
   width: 100%;
   font: inherit;
@@ -239,6 +240,7 @@ small {
   color: var(--text);
 }
 input:focus-visible,
+select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
   outline: 3px solid var(--accent);
