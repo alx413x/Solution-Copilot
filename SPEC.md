@@ -856,7 +856,7 @@ build_retrieval_queries → retrieve_evidence → draft_outline
 
 ### 11.4 完整度
 
-S04 实现契约（D016）：需求项以稳定 UUID 保存于项目唯一档案 JSONB，最多 200 项；暂不单独建 requirement_items 表。PATCH 携带档案 version，可指定 item_id 与 item/status/resolve_with，或修改 summary；冲突只能显式 keep/replace。提取接受 text 与 document_ids，返回持久化 extraction；GET 档案包含最新任务、missing_categories 和来源快照。POST `/projects/{project_id}/requirements/extractions/{extraction_id}/cancel` 可取消活动提取。消息来源与澄清回答在 S05 接入。提取期间档案变化则拒绝发布，不自动重放覆盖人工修改。
+S04 实现契约（D016）：需求项以稳定 UUID 保存于项目唯一档案 JSONB，最多 200 项；暂不单独建 requirement_items 表。PATCH 携带档案 version，可指定 item_id 与 item/status/resolve_with，或修改 summary；冲突只能显式 keep/replace。提取接受 text 与 document_ids，返回持久化 extraction；GET 档案包含最新任务、missing_categories 和来源快照。POST `/projects/{project_id}/requirements/extractions/{extraction_id}/cancel` 可取消活动提取。消息来源与澄清回答已在 S05 接入。提取期间档案变化则拒绝发布，不自动重放覆盖人工修改。
 
 完整度用于辅助追问，按项目模板配置权重。默认必备类别：
 
@@ -1007,6 +1007,8 @@ SSE 事件至少包括：
 
 流式断线后，客户端可使用最后事件 ID 重连；最终数据以持久化消息和运行状态为准。
 
+S05 实施契约（D017）：新增 GET `/projects/{id}/dialogue` 聚合工作台、POST `/projects/{id}/clarifications` 检查缺口、GET `/runs/{id}` 读取终态、GET `/messages/{id}` 授权读取来源。发送携带 text/request_id/epoch；回答携带 conversation_id/answer/version/profile_version/epoch。消息历史以 after=seq 分页，重置后保留历史并递增 epoch。Run 的 events 为有界 JSONB，Last-Event-ID 或 after 重放；每连接 25 秒，重连时凭据与权限重新验证。模型 JSON 校验后发布 message.delta，未实现 provider token streaming。S05 /resume 创建后续幂等 Run，S06 再实现图检查点恢复。
+
 ### 13.7 方案与导出
 
 | 方法 | 路径 | 用途 |
@@ -1033,6 +1035,8 @@ SSE 事件至少包括：
 | `POST` | `/projects/{id}/memories/reset` | 重置项目记忆 |
 
 重置接口必须返回预估影响数量并要求显式 `confirm=true`；客户级记忆不能被项目级重置删除。
+
+S05 记忆实施补充：POST `/projects/{id}/memories` 从授权消息保存 proposed 记忆；PATCH 携带 version/content/status/expires_at，DELETE 携带 version。只有 confirmed 且未到期的记忆进入上下文。conversation 必须绑定会话和项目；project 绑定项目；customer 不绑定项目。会话重置停用会话记忆并提升 epoch，项目重置仅停用项目记忆，两者保留客户记忆和历史消息。删除、修改和重置留存最小审计事件。
 
 ### 13.9 任务状态
 

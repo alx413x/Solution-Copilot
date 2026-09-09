@@ -86,8 +86,11 @@ class ConfirmInput(Input):
 
 class SourceView(BaseModel):
     source_id: str
-    type: Literal["document", "user"]
+    type: Literal["document", "user", "message"]
     quote: str
+    message_seq: int | None = None
+    message_id: UUID | None = None
+    conversation_id: UUID | None = None
     document_id: UUID | None = None
     title: str
     generation: int | None = None

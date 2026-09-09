@@ -255,3 +255,140 @@ class Job(Record, Base):
         CheckConstraint("status IN ('queued','running','succeeded','failed','cancelled')"),
         CheckConstraint("progress BETWEEN 0 AND 100"),
     )
+
+
+class Conversation(Record, Base):
+    __tablename__ = "conversations"
+    organization_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID] = mapped_column(index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    epoch: Mapped[int] = mapped_column(default=0)
+    next_seq: Mapped[int] = mapped_column(default=1)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        UniqueConstraint("organization_id", "id"),
+    )
+
+
+class Message(Record, Base):
+    __tablename__ = "messages"
+    organization_id: Mapped[UUID] = mapped_column()
+    conversation_id: Mapped[UUID] = mapped_column(index=True)
+    epoch: Mapped[int] = mapped_column()
+    seq: Mapped[int] = mapped_column()
+    role: Mapped[str] = mapped_column(String(20))
+    content: Mapped[list] = mapped_column(JSONB)
+    run_id: Mapped[UUID | None] = mapped_column(ForeignKey("generation_runs.id"))
+    model_info: Mapped[dict] = mapped_column(JSONB, default=dict)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "conversation_id"],
+            ["conversations.organization_id", "conversations.id"],
+        ),
+        UniqueConstraint("conversation_id", "seq"),
+        CheckConstraint("role IN ('user','assistant','system','tool')"),
+    )
+
+
+class GenerationRun(Record, Base):
+    __tablename__ = "generation_runs"
+    organization_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID] = mapped_column()
+    conversation_id: Mapped[UUID] = mapped_column()
+    actor_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    request_id: Mapped[UUID] = mapped_column()
+    status: Mapped[str] = mapped_column(String(20), default="queued")
+    attempts: Mapped[int] = mapped_column(default=0)
+    lease_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    payload: Mapped[dict] = mapped_column(JSONB)
+    # ponytail: <=230 bounded events per run; normalize for token-level live streaming.
+    events: Mapped[list] = mapped_column(JSONB, default=list)
+    model_info: Mapped[dict] = mapped_column(JSONB, default=dict)
+    error_message: Mapped[str | None] = mapped_column()
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        ForeignKeyConstraint(
+            ["organization_id", "conversation_id"],
+            ["conversations.organization_id", "conversations.id"],
+        ),
+        UniqueConstraint("conversation_id", "request_id"),
+        CheckConstraint(
+            "status IN ('queued','running','waiting_user','succeeded','failed','cancelled')"
+        ),
+        Index(
+            "uq_active_generation_run",
+            "project_id",
+            unique=True,
+            postgresql_where=text("status IN ('queued','running')"),
+        ),
+    )
+
+
+class Clarification(Record, Base):
+    __tablename__ = "clarifications"
+    organization_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID] = mapped_column()
+    category: Mapped[str] = mapped_column(String(40))
+    question: Mapped[str] = mapped_column()
+    reason: Mapped[str] = mapped_column()
+    importance: Mapped[str] = mapped_column(String(20))
+    status: Mapped[str] = mapped_column(String(20), default="open")
+    answer: Mapped[str | None] = mapped_column()
+    source_message_id: Mapped[UUID | None] = mapped_column(ForeignKey("messages.id"))
+    answered_by: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        UniqueConstraint("project_id", "category"),
+        CheckConstraint("status IN ('open','answered','skipped')"),
+        CheckConstraint("importance IN ('required','recommended')"),
+    )
+
+
+class Memory(Record, Base):
+    __tablename__ = "memories"
+    organization_id: Mapped[UUID] = mapped_column()
+    customer_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID | None] = mapped_column()
+    conversation_id: Mapped[UUID | None] = mapped_column()
+    scope: Mapped[str] = mapped_column(String(20))
+    kind: Mapped[str] = mapped_column(String(20))
+    content: Mapped[str] = mapped_column()
+    source_message_id: Mapped[UUID] = mapped_column(ForeignKey("messages.id"))
+    status: Mapped[str] = mapped_column(String(20), default="proposed")
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "customer_id"], ["customers.organization_id", "customers.id"]
+        ),
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        ForeignKeyConstraint(
+            ["organization_id", "conversation_id"],
+            ["conversations.organization_id", "conversations.id"],
+        ),
+        CheckConstraint(
+            "(scope='customer' AND project_id IS NULL AND conversation_id IS NULL) OR "
+            "(scope='project' AND project_id IS NOT NULL AND conversation_id IS NULL) OR "
+            "(scope='conversation' AND project_id IS NOT NULL AND conversation_id IS NOT NULL)"
+        ),
+        CheckConstraint("status IN ('proposed','confirmed','expired')"),
+    )
+
+
+class AuditEvent(Record, Base):
+    __tablename__ = "audit_events"
+    organization_id: Mapped[UUID] = mapped_column(ForeignKey("organizations.id"))
+    actor_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    action: Mapped[str] = mapped_column(String(80))
+    resource_id: Mapped[UUID] = mapped_column()
+    data: Mapped[dict] = mapped_column(JSONB)

@@ -183,6 +183,9 @@ export function RecordDetail({
                 当前阶段：{record.status === "archived" ? "已归档" : "需求收集"}
                 。
               </p>
+              <p>
+                <Link href={`/projects/${id}/dialogue`}>澄清与对话 →</Link>
+              </p>
               <Link href={`/projects/${id}/knowledge`}>管理项目资料 →</Link>
               <p>
                 <Link href={`/projects/${id}/requirements`}>

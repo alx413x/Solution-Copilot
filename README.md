@@ -1,10 +1,10 @@
 # Solution Copilot
 
-面向售前工程师的可追溯方案工作台。当前已实现 S00–S03 基础与检索，以及 S04 需求结构化；下一阶段为 S05 澄清与对话。
+面向售前工程师的可追溯方案工作台。当前已实现 S00–S03 基础与检索，以及 S04 需求结构化、S05 澄清与对话；下一阶段为 S06 Agent 编排。
 
 ## 本地启动
 
-前置：Node 24、pnpm（项目自动选择 packageManager 指定的 10.x）、Python 3.12、uv 0.8.19、已运行的 Docker Desktop/Compose。所有命令在仓库根目录执行。
+前置：Node 24、pnpm（项目自动选择 packageManager 指定的版本）、Python 3.12、uv 0.8.19、已运行的 Docker Desktop/Compose。所有命令在仓库根目录执行。
 
 ```sh
 cp .env.example .env  # 首次执行；已有配置不要覆盖
@@ -43,6 +43,7 @@ uv run --group test python scripts/smoke.py
 uv run --group test python scripts/smoke_s01.py
 uv run --group test python -m scripts.smoke_s02
 uv run python -m scripts.eval_s03
+uv run --group test python -m scripts.smoke_s04
 ```
 
 `/api/v1/health/live` 只检查 API 存活；`/api/v1/health/ready` 检查数据库及 vector 扩展、Redis、私有 bucket，可用为 200，不可用为 503，响应不包含异常或凭据。浏览器通过同源 `/api/health` 调用 API，API 地址只在 Web 服务端读取。
@@ -99,3 +100,14 @@ DeepSeek 生成配置从根目录 `.env` 读取 `MODEL_PROVIDER`、`MODEL_NAME` 
 按类别核对需求和来源，支持手动新增、编辑、确认、拒绝。新信息与旧项冲突时，显式选择保留原项或采用新项，解决所有冲突后才能确认整个档案。提取不会覆盖人工内容；期间有人编辑时结果停止发布，可重新提取。失败、取消和进程恢复均从数据库读取状态。
 
 单次输入最多 30000 字、10 份资料和 200 个片段，每个档案最多 200 项。完整度只表示八类需求的覆盖情况，具体缺失项始终可见。真实合成样例验证运行 `uv run --group test python -m scripts.smoke_s04`，会调用配置的模型并保留演示项目；验收证据和边界见 [S04 验收记录](docs/S04_VALIDATION.md)。
+
+
+## S05 澄清与对话
+
+在项目总览进入“澄清与对话”，新建会话后发送需求，或点击“检查缺失信息”逐项回答。回答形成待确认需求，可从需求档案跳回原始消息；必答问题不可跳过，模型候选仍需核实。
+
+消息可“保存为记忆”，选择会话、项目或客户范围；保存后点击“编辑 / 确认”才用于后续模型上下文。会话重置仅移出旧消息上下文并停用会话记忆；项目重置仅停用项目记忆，均先显示影响数量，客户记忆保留，需求档案不清空。
+
+SSE 支持断线按事件 ID 重连，历史消息和运行状态来自 PostgreSQL；当前模型返回完整 JSON 后分段发布，不是逐 token 实时输出。保持 dispatcher 和 Worker 运行。生产运行恢复图留给 S06。
+
+验收：`RUN_DB_TESTS=1 uv run --group test pytest -q`；`uv run --group test python scripts/smoke_s05.py` 使用本地演示账号和合成输入，创建保留的验收项目，调用已配置 DeepSeek。范围、指标与限制见 [S05 验收记录](docs/S05_VALIDATION.md)。

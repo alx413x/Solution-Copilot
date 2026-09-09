@@ -386,3 +386,15 @@ dd {
     white-space: normal;
   }
 }
+
+.message-list {
+  list-style: none;
+  padding: 0;
+}
+.message-list li {
+  display: block;
+  scroll-margin-top: 1rem;
+}
+.message-list li:target {
+  outline: 2px solid var(--accent);
+}

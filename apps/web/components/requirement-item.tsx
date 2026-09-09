@@ -139,7 +139,12 @@ export function RequirementItem({
     <article className="panel">
       <h3>{item.title}</h3>
       <p>
-        {statuses[item.status]} · {item.edited ? "人工编辑" : "模型提取"}
+        {statuses[item.status]} ·{" "}
+        {item.edited
+          ? "人工编辑"
+          : item.confidence == null
+            ? "用户回答"
+            : "模型提取"}
       </p>
       {editing ? (
         <ItemForm
@@ -173,6 +178,13 @@ export function RequirementItem({
               : ""}
           </p>
           <blockquote>{s.quote}</blockquote>
+          {s.conversation_id && (
+            <a
+              href={`dialogue?conversation=${s.conversation_id}&after=${Math.max(0, (s.message_seq ?? 1) - 1)}#message-${s.message_id}`}
+            >
+              查看来源消息
+            </a>
+          )}
           {s.document_id && (
             <a href={`/api/backend/documents/${s.document_id}/download`}>
               下载来源原文

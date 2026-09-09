@@ -22,6 +22,8 @@ export async function upstream(
     "Content-Type":
       new Headers(init.headers).get("Content-Type") ?? "application/json",
   });
+  const lastEventId = new Headers(init.headers).get("Last-Event-ID");
+  if (lastEventId) headers.set("Last-Event-ID", lastEventId);
   const credential = token ?? jar.get("sc_token")?.value;
   if (credential) headers.set("Authorization", `Bearer ${credential}`);
   const org = jar.get("sc_org")?.value;

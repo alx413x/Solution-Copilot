@@ -8,6 +8,7 @@ from solution_copilot.application.errors import AppError
 from solution_copilot.config import get_settings
 from solution_copilot.infrastructure.health import HealthReport, readiness
 
+from apps.api.conversations import router as conversations_router
 from apps.api.customers import router
 from apps.api.documents import router as documents_router
 from apps.api.requirements import router as requirements_router
@@ -23,6 +24,7 @@ async def lifespan(app):
 
 app = FastAPI(title="Solution Copilot API", version="0.2.0", lifespan=lifespan)
 app.include_router(router)
+app.include_router(conversations_router)
 app.include_router(documents_router)
 app.include_router(retrieval_router)
 app.include_router(requirements_router)

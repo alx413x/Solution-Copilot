@@ -1,0 +1,187 @@
+{
+  "project_id": "9524b6e0-a7d9-4d59-8767-962861effe41",
+  "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c",
+  "input": "项目预算上限100万元，必须部署在客户自有服务器。请记录这些要求。",
+  "elapsed_seconds": 33.78,
+  "run": {
+    "id": "7412d929-8555-46aa-95ff-6397736b82ed",
+    "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c",
+    "status": "waiting_user",
+    "attempts": 1,
+    "model_info": {
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "total_tokens": 1148,
+        "prompt_tokens": 848,
+        "completion_tokens": 300,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 848
+      },
+      "provider": "deepseek",
+      "prompt_version": "s05-v1"
+    },
+    "error_message": null
+  },
+  "profile": {
+    "project_id": "9524b6e0-a7d9-4d59-8767-962861effe41",
+    "version": 1,
+    "summary": "用户明确提出项目预算上限100万元，且必须部署在客户自有服务器。这两项要求需要记录。",
+    "items": [
+      {
+        "category": "timeline_budget",
+        "title": "项目预算上限100万元",
+        "content": "项目预算上限为100万元人民币。",
+        "priority": "must",
+        "id": "235cf87b-78ae-4c38-aeb0-c7a2780ba632",
+        "status": "proposed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+            "type": "message",
+            "quote": "项目预算上限100万元",
+            "message_seq": 1,
+            "message_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+            "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c",
+            "document_id": null,
+            "title": "对话消息",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      },
+      {
+        "category": "constraint",
+        "title": "必须部署在客户自有服务器",
+        "content": "项目必须部署在客户自有服务器上，不能使用云服务等外部托管方式。",
+        "priority": "must",
+        "id": "44ecde78-3f61-45ba-863d-8c76bc45ec7d",
+        "status": "proposed",
+        "confidence": 1.0,
+        "sources": [
+          {
+            "source_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+            "type": "message",
+            "quote": "必须部署在客户自有服务器",
+            "message_seq": 1,
+            "message_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+            "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c",
+            "document_id": null,
+            "title": "对话消息",
+            "generation": null,
+            "page_number": null,
+            "section_path": [],
+            "line_start": null,
+            "line_end": null
+          }
+        ],
+        "edited": false,
+        "conflicts_with": []
+      }
+    ],
+    "completeness_score": 12.5,
+    "missing_categories": [
+      "background",
+      "pain_point",
+      "goal",
+      "functional",
+      "integration",
+      "security_compliance",
+      "acceptance_metric"
+    ],
+    "confirmed_at": null,
+    "writable": true,
+    "extraction": null
+  },
+  "messages": [
+    {
+      "id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+      "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c",
+      "seq": 1,
+      "epoch": 0,
+      "role": "user",
+      "content": [
+        {
+          "text": "项目预算上限100万元，必须部署在客户自有服务器。请记录这些要求。",
+          "type": "text"
+        }
+      ],
+      "run_id": "7412d929-8555-46aa-95ff-6397736b82ed",
+      "model_info": {},
+      "created_at": "2026-09-09T10:32:42.774019Z"
+    },
+    {
+      "id": "c93752df-d84f-46c4-89fd-38544817aacb",
+      "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c",
+      "seq": 2,
+      "epoch": 0,
+      "role": "assistant",
+      "content": [
+        {
+          "text": "已记录您的要求：项目预算上限100万元，并且必须部署在客户自有服务器上。我会将这些作为硬性约束。",
+          "type": "text"
+        },
+        {
+          "type": "citation",
+          "quote": "项目预算上限100万元",
+          "title": "对话消息",
+          "source_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+          "message_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+          "message_seq": 1,
+          "source_type": "message",
+          "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c"
+        },
+        {
+          "type": "citation",
+          "quote": "必须部署在客户自有服务器",
+          "title": "对话消息",
+          "source_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+          "message_id": "d3f1411d-dcbf-4577-b9dd-e34c690a7ee5",
+          "message_seq": 1,
+          "source_type": "message",
+          "conversation_id": "a5c2b6f5-1fb3-4c71-8a0b-46faa251984c"
+        }
+      ],
+      "run_id": "7412d929-8555-46aa-95ff-6397736b82ed",
+      "model_info": {
+        "model": "deepseek-v4-flash-vision-exp",
+        "usage": {
+          "total_tokens": 1148,
+          "prompt_tokens": 848,
+          "completion_tokens": 300,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 848
+        },
+        "provider": "deepseek",
+        "prompt_version": "s05-v1"
+      },
+      "created_at": "2026-09-09T10:33:16.476849Z"
+    }
+  ],
+  "first_event_id": 1,
+  "replayed_event_ids": [
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "reset_preview": {
+    "confirmed": false,
+    "memories": 0,
+    "context_messages": 3,
+    "runs": 0
+  },
+  "customer_memory_preserved": true
+}

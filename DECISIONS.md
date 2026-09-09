@@ -163,3 +163,15 @@
 - 验证：真实 PostgreSQL 两组织/两客户/三角色，伪造身份、跨组织/客户、归档和版本冲突测试；生产禁止开发模式测试。S02 起补充具体 Worker 用例的执行时鉴权测试。
 
 D014 技术核对：[PyJWT 校验 API](https://pyjwt.readthedocs.io/en/stable/api.html)、[SQLAlchemy 组合外键](https://docs.sqlalchemy.org/en/20/core/constraints.html)。实现版本由锁文件维护；S01 验收见 docs/S01_VALIDATION.md。
+
+## D017｜S05 澄清、对话与记忆
+
+- 状态：implemented，本地验收通过；2026-09-09，当前任务。
+- 澄清按八个必备类别生成固定问题，另提供风险建议问题；项目/类别唯一去重。明确回答直接形成带消息来源的待确认需求，复用 S04 合并、档案版本和显式冲突解决，不额外调用模型。检查缺口时同步已有回答状态，必答问题不能跳过。
+- 新增 conversations/messages/generation_runs/clarifications/memories/audit_events。对话范围由项目推导客户和组织，避免重复存储；消息用 text/citation/tool_status/error 块，按会话 seq 分页，每页 100 条。
+- 每项目仅一个活动对话运行；请求 UUID 保证同会话重试幂等。沿用 PostgreSQL outbox、180 秒租约、attempt fencing、最多三次进程恢复；模型调用不持有事务。开始与发布时重新鉴权，档案 version、会话 epoch 和已确认记忆版本变化时拒绝发布。
+- SSE 使用运行内递增事件 ID，支持 Last-Event-ID / after；25 秒连接周期、逐秒心跳和实时凭据/权限重查。终态以数据库为准。事件存在 Run JSONB，当前完整 JSON 校验后发布分段文本，并非模型逐 token 实时输出；有低首字延迟需求时再做 provider streaming 和独立事件表。
+- /resume 在 S05 创建幂等的后续运行，图检查点恢复由 S06 接入。waiting_user 释放 Worker，不占用活动运行槽。
+- 会话记忆只用于该会话，项目记忆只用于该项目，客户记忆跨该客户的项目共享。保存默认 proposed，必须显式确认才进入模型上下文；删除、编辑、确认与重置记录最小审计元数据。
+- 会话重置提升 epoch、停用会话记忆、取消旧运行，历史消息保留；项目记忆重置只停用 scope=project，客户记忆保留。两类重置先返回影响数量，confirm=true 才执行；并发变化时返回实际执行数量。
+- 有界实现：每项目 100 会话、每客户 200 条未停用记忆；模型上下文最多最近 20 消息/20000 字及 20000 字确认记忆，档案最多 30000 字。无自动长期记忆推断、滚动摘要、工具执行或自动知识检索，S06 后按具体流程接入。

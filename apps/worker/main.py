@@ -34,3 +34,10 @@ def check_infrastructure():
     if report.status != "ok":
         raise RuntimeError("Infrastructure unavailable")
     return report.model_dump()
+
+
+@app.task(name="conversations.respond", acks_late=True, reject_on_worker_lost=True)
+def respond_conversation(run_id):
+    from solution_copilot.application.conversation_jobs import run_job
+
+    run_job(run_id)
