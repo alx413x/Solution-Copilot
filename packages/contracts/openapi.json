@@ -1334,7 +1334,15 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MessageInput"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MessageInput"
+                  },
+                  {
+                    "$ref": "#/components/schemas/WorkflowResume"
+                  }
+                ],
+                "title": "Data"
               }
             }
           }
@@ -1864,6 +1872,134 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MessageView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/workflows": {
+      "post": {
+        "summary": "Start Workflow",
+        "operationId": "start_workflow_api_v1_conversations__conversation_id__workflows_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "x-organization-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunView"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/workflows/latest": {
+      "get": {
+        "summary": "Latest Workflow",
+        "operationId": "latest_workflow_api_v1_conversations__conversation_id__workflows_latest_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "x-organization-id",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "X-Organization-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RunView"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Latest Workflow Api V1 Conversations  Conversation Id  Workflows Latest Get"
                 }
               }
             }
@@ -4519,6 +4655,24 @@
         ],
         "title": "MessageView"
       },
+      "OutlineSection": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "OutlineSection"
+      },
       "ProfileView": {
         "properties": {
           "project_id": {
@@ -4810,6 +4964,16 @@
               }
             ],
             "title": "Error Message"
+          },
+          "workflow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkflowView"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -5145,6 +5309,95 @@
           "version"
         ],
         "title": "VersionInput"
+      },
+      "WorkflowInput": {
+        "properties": {
+          "goal": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Goal"
+          },
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Request Id"
+          },
+          "epoch": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Epoch"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "goal",
+          "request_id",
+          "epoch"
+        ],
+        "title": "WorkflowInput"
+      },
+      "WorkflowResume": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Request Id"
+          },
+          "gate": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 1.0,
+            "title": "Gate"
+          },
+          "approve": {
+            "type": "boolean",
+            "title": "Approve"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "gate",
+          "approve"
+        ],
+        "title": "WorkflowResume"
+      },
+      "WorkflowView": {
+        "properties": {
+          "stage": {
+            "type": "string",
+            "title": "Stage"
+          },
+          "gate": {
+            "type": "integer",
+            "title": "Gate"
+          },
+          "outline": {
+            "items": {
+              "$ref": "#/components/schemas/OutlineSection"
+            },
+            "type": "array",
+            "title": "Outline"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Warnings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stage",
+          "gate",
+          "outline",
+          "warnings"
+        ],
+        "title": "WorkflowView"
       },
       "WorkspaceView": {
         "properties": {

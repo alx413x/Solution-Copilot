@@ -1,0 +1,81 @@
+{
+  "project_id": "71087696-d28d-47aa-8ca3-175b8c3637d1",
+  "conversation_id": "5421ea9f-62be-42fa-8974-c6697b0a132c",
+  "run_id": "c0204b50-bd17-4a47-ae68-661bbcce5f49",
+  "elapsed_seconds": 34.93,
+  "first_gate": 1,
+  "outline_gate": 2,
+  "final": {
+    "id": "c0204b50-bd17-4a47-ae68-661bbcce5f49",
+    "conversation_id": "5421ea9f-62be-42fa-8974-c6697b0a132c",
+    "status": "succeeded",
+    "attempts": 3,
+    "model_info": {},
+    "error_message": null,
+    "workflow": {
+      "stage": "ready_for_generation",
+      "gate": 0,
+      "outline": [
+        {
+          "id": "section-01",
+          "title": "执行摘要"
+        },
+        {
+          "id": "section-02",
+          "title": "客户背景与现状"
+        },
+        {
+          "id": "section-03",
+          "title": "需求与痛点分析"
+        },
+        {
+          "id": "section-04",
+          "title": "建设目标"
+        },
+        {
+          "id": "section-05",
+          "title": "总体解决方案"
+        },
+        {
+          "id": "section-06",
+          "title": "功能设计"
+        },
+        {
+          "id": "section-07",
+          "title": "技术架构"
+        },
+        {
+          "id": "section-08",
+          "title": "系统集成与数据流"
+        },
+        {
+          "id": "section-09",
+          "title": "安全与合规"
+        },
+        {
+          "id": "section-10",
+          "title": "实施计划"
+        },
+        {
+          "id": "section-11",
+          "title": "风险及应对措施"
+        },
+        {
+          "id": "section-12",
+          "title": "验收指标"
+        },
+        {
+          "id": "section-13",
+          "title": "预期价值"
+        },
+        {
+          "id": "section-14",
+          "title": "参考资料"
+        }
+      ],
+      "warnings": []
+    }
+  },
+  "replay_safe": true,
+  "sse_replay": true
+}

@@ -112,11 +112,11 @@
 
 ## D012 — 任务与事件的持久化契约
 
-- 状态：open；解决期限：S02 任务入队、S05 SSE、S06 恢复；责任：阶段执行者。
+- 状态：implemented（D015/D017/D018）；S02 任务入队、S05 SSE、S06 恢复已实施；责任：阶段执行者。
 - 待定：幂等键、入队失败补偿、Worker 失联恢复、事件存储与保留期、Last-Event-ID 重放及重复 resume 处理。
 - 原因：SPEC 已要求可恢复行为，仍需具体存储和事务设计。
 - 验收：入队失败不丢任务，重连不丢终态，重复执行不重复生成版本，取消有最终可查询状态。
-- S02 收敛：PostgreSQL jobs 同时作为 outbox，独立 dispatcher 每 2 秒补偿，成功投递后 30 秒未领取会重发；Redis 不保存权威终态。文档 ID + generation 为业务幂等键；文档锁后任务锁、attempt fencing、300 秒可续租租约，最多 3 次自动尝试。任务开始及解析检查点、发布前重新鉴权。取消后旧 attempt 无权提交。S05/S06 事件与工作流恢复仍 open。
+- S02 收敛：PostgreSQL jobs 同时作为 outbox，独立 dispatcher 每 2 秒补偿，成功投递后 30 秒未领取会重发；Redis 不保存权威终态。文档 ID + generation 为业务幂等键；文档锁后任务锁、attempt fencing、300 秒可续租租约，最多 3 次自动尝试。任务开始及解析检查点、发布前重新鉴权。取消后旧 attempt 无权提交。S05/S06 事件与工作流恢复由 D017/D018 收敛。
 
 ## D015 — S02 解析版本与限制
 
@@ -175,3 +175,16 @@ D014 技术核对：[PyJWT 校验 API](https://pyjwt.readthedocs.io/en/stable/ap
 - 会话记忆只用于该会话，项目记忆只用于该项目，客户记忆跨该客户的项目共享。保存默认 proposed，必须显式确认才进入模型上下文；删除、编辑、确认与重置记录最小审计元数据。
 - 会话重置提升 epoch、停用会话记忆、取消旧运行，历史消息保留；项目记忆重置只停用 scope=project，客户记忆保留。两类重置先返回影响数量，confirm=true 才执行；并发变化时返回实际执行数量。
 - 有界实现：每项目 100 会话、每客户 200 条未停用记忆；模型上下文最多最近 20 消息/20000 字及 20000 字确认记忆，档案最多 30000 字。无自动长期记忆推断、滚动摘要、工具执行或自动知识检索，S06 后按具体流程接入。
+
+## D018｜S06 持久化人工确认
+
+- 状态：implemented，验收见 [S06](docs/S06_VALIDATION.md)；收敛 D012 的工作流恢复部分。
+- 使用 LangGraph 1.x 与官方 PostgreSQL saver 3.x，复用现有 generation_runs、dispatcher、Celery、SSE，不增加第二套任务系统。依赖精确版本见 uv.lock；LangChain/LangSmith 是传递依赖，本阶段不接追踪服务、不调用生成模型。
+- 图节点是需求确认、大纲草拟、大纲确认。S04/S05 提取和澄清继续复用；授权检索在 Worker 准备输入时执行。状态保存服务端 scope、目标、需求 ID/version、Chunk ID/generation、固定大纲和警告。
+- 原生 saver 使用业务事务的 psycopg 连接，sync durability；每次推进至中断或结束时 checkpoint、Run、消息、事件原子提交。中断不持有 Worker 或数据库连接；进程重启用 Run ID 作为 thread_id 读取检查点。纯节点允许重放。
+- 每个确认门仅消费一次；resume 的 request UUID 和 gate 保存在 Run payload，重复请求返回原运行。每项目锁串行写入，保留 S05 queued/running 唯一约束，并限制一个 waiting/active 编排；等待时可用普通聊天补充需求。
+- 恢复 API 和执行 Worker 分别重新鉴权、检查 epoch 与需求确认，确认大纲时比较档案版本和引用当前状态。归档/重置/取消沿用共享边界；失效输入要求取消并重开，不能确认旧大纲后悄悄替换输入。
+- 原生 schema 由显式 Alembic 迁移创建，不在 Worker startup 自动 setup；新表索引用普通事务索引取代官方 setup 的 concurrent 创建。未来 saver 升级须显式迁移并跑回滚/重启测试。
+- S06 固定 14 章大纲遵循阶段允许的受控节点；S07 接真实生成、可编辑大纲和版本。当前锁内仅本地检索与图操作；远程生成必须移出事务并校验发布版本。检查点保留期由部署阶段落实。
+
+API 依据：[LangGraph interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts)、[Persistence](https://docs.langchain.com/oss/python/langgraph/persistence)；本地安装的 PostgresSaver `_cursor` 已核对无业务事务自动提交。

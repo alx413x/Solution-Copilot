@@ -300,7 +300,7 @@ def send_message(session, identity, conversation_id, data):
         )
     )
     if prior:
-        if prior.payload["text"] != data.text or prior.payload["epoch"] != data.epoch:
+        if prior.payload.get("text") != data.text or prior.payload["epoch"] != data.epoch:
             raise AppError(409, "REQUEST_REUSED", "请求标识已用于其他消息。")
         return prior
     if conversation.epoch != data.epoch:

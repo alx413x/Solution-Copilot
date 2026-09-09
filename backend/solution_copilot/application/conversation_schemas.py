@@ -71,6 +71,18 @@ class MessageView(BaseModel):
     created_at: datetime
 
 
+class OutlineSection(BaseModel):
+    id: str
+    title: str
+
+
+class WorkflowView(BaseModel):
+    stage: str
+    gate: int
+    outline: list[OutlineSection]
+    warnings: list[str]
+
+
 class RunView(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: UUID
@@ -79,6 +91,7 @@ class RunView(BaseModel):
     attempts: int
     model_info: dict
     error_message: str | None
+    workflow: WorkflowView | None = None
 
 
 class ClarificationView(BaseModel):

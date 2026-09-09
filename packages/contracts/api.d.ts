@@ -386,6 +386,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/conversations/{conversation_id}/workflows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Workflow */
+        post: operations["start_workflow_api_v1_conversations__conversation_id__workflows_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/conversations/{conversation_id}/workflows/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Latest Workflow */
+        get: operations["latest_workflow_api_v1_conversations__conversation_id__workflows_latest_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/documents": {
         parameters: {
             query?: never;
@@ -1224,6 +1258,13 @@ export interface components {
              */
             created_at: string;
         };
+        /** OutlineSection */
+        OutlineSection: {
+            /** Id */
+            id: string;
+            /** Title */
+            title: string;
+        };
         /** ProfileView */
         ProfileView: {
             /**
@@ -1353,6 +1394,7 @@ export interface components {
             };
             /** Error Message */
             error_message: string | null;
+            workflow?: components["schemas"]["WorkflowView"] | null;
         };
         /** SearchInput */
         SearchInput: {
@@ -1449,6 +1491,41 @@ export interface components {
         VersionInput: {
             /** Version */
             version: number;
+        };
+        /** WorkflowInput */
+        WorkflowInput: {
+            /** Goal */
+            goal: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Epoch */
+            epoch: number;
+        };
+        /** WorkflowResume */
+        WorkflowResume: {
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+            /** Gate */
+            gate: number;
+            /** Approve */
+            approve: boolean;
+        };
+        /** WorkflowView */
+        WorkflowView: {
+            /** Stage */
+            stage: string;
+            /** Gate */
+            gate: number;
+            /** Outline */
+            outline: components["schemas"]["OutlineSection"][];
+            /** Warnings */
+            warnings: string[];
         };
         /** WorkspaceView */
         WorkspaceView: {
@@ -2208,7 +2285,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["MessageInput"];
+                "application/json": components["schemas"]["MessageInput"] | components["schemas"]["WorkflowResume"];
             };
         };
         responses: {
@@ -2507,6 +2584,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MessageView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    start_workflow_api_v1_conversations__conversation_id__workflows_post: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkflowInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    latest_workflow_api_v1_conversations__conversation_id__workflows_latest_get: {
+        parameters: {
+            query?: never;
+            header: {
+                "x-organization-id": string;
+            };
+            path: {
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunView"] | null;
                 };
             };
             /** @description Validation Error */

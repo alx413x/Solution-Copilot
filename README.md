@@ -108,6 +108,12 @@ DeepSeek 生成配置从根目录 `.env` 读取 `MODEL_PROVIDER`、`MODEL_NAME` 
 
 消息可“保存为记忆”，选择会话、项目或客户范围；保存后点击“编辑 / 确认”才用于后续模型上下文。会话重置仅移出旧消息上下文并停用会话记忆；项目重置仅停用项目记忆，均先显示影响数量，客户记忆保留，需求档案不清空。
 
-SSE 支持断线按事件 ID 重连，历史消息和运行状态来自 PostgreSQL；当前模型返回完整 JSON 后分段发布，不是逐 token 实时输出。保持 dispatcher 和 Worker 运行。生产运行恢复图留给 S06。
+SSE 支持断线按事件 ID 重连，历史消息和运行状态来自 PostgreSQL；当前模型返回完整 JSON 后分段发布，不是逐 token 实时输出。保持 dispatcher 和 Worker 运行。S06 编排已接入独立持久化确认图。
 
 验收：`RUN_DB_TESTS=1 uv run --group test pytest -q`；`uv run --group test python scripts/smoke_s05.py` 使用本地演示账号和合成输入，创建保留的验收项目，调用已配置 DeepSeek。范围、指标与限制见 [S05 验收记录](docs/S05_VALIDATION.md)。
+
+## S06 方案编排
+
+升级运行 `uv sync --locked`、`uv run alembic upgrade head` 并重启开发服务。在“澄清与对话”选择会话，点击“开始方案编排”。若需求不完整，先逐项回答、在需求档案确认，再点击“需求已确认，继续”；审核固定 14 章大纲后点击“确认此大纲”。该状态表示 S06 完成，正文生成由 S07 接入。
+
+关闭页面或重启服务后仍可从原会话继续；可以取消编排后重新开始。档案或引用在等待期间变化时拒绝旧确认，请取消重开。已有 S05 聊天与记忆流程保持独立；运行事件沿用 SSE。实现与验收见 [S06 验收记录](docs/S06_VALIDATION.md)。

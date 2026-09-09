@@ -1385,3 +1385,11 @@ class EmbeddingModel(Protocol):
 - `/api/v1/me` 返回当前用户与所属组织/角色；JWT/JWKS 验证已实现，真实 OIDC 供应商和 Web 授权码登录流程待部署前接入，当前 token 登录仅作为可运行入口。
 - Web 新增查询/表单运行依赖 TanStack Query、react-hook-form、@hookform/resolvers、zod；Prettier 为格式检查开发依赖。状态页及业务页沿用语义 CSS tokens；Tailwind/shadcn 在需要具体业务组件时引入。
 - S01 项目总览只展示已实现的资料与负责人，不提供未实现的需求/知识/对话操作；后续阶段补齐 14.2 工作台侧栏和来源面板。
+
+## 26. S06 实施补充（2026-09-10，D018）
+
+- `POST /api/v1/conversations/{id}/workflows` 接受 goal（1–500 字）、request_id、epoch；响应既有 RunView，新增 workflow（stage/gate/outline/warnings）。
+- `GET /api/v1/conversations/{id}/workflows/latest` 返回最近编排，避免普通对话覆盖编排入口。`GET /runs/{id}` 和 SSE/取消复用 S05 接口。
+- `/runs/{id}/resume` 区分 S05 MessageInput 与 S06 `{request_id,gate,approve}`；gate 为 1（需求）或 2（大纲）。未知字段拒绝。编排不得使用普通消息结构绕过确认。
+- 需求门要求八类 confirmed、档案显式确认且无冲突；大纲门重新检查档案版本与检索引用。S06 使用固定章节模板，不生成正文；完成值 `ready_for_generation` 是 S07 输入。
+- 运行按项目串行，等待时释放资源；原生 PostgreSQL checkpoint 和业务结果以确认点为单位事务提交。重放幂等、取消/重置 fencing、权限撤销测试见 S06 验收记录。

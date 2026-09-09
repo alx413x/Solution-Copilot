@@ -7,6 +7,7 @@ from fastapi import APIRouter, Header, Query
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials
 from solution_copilot.application import conversations as service
+from solution_copilot.application import workflows
 from solution_copilot.application.access import resolve_identity
 from solution_copilot.application.conversation_schemas import (
     AnswerInput,
@@ -91,11 +92,20 @@ def cancel(run_id: UUID, session: SessionDep, identity: IdentityDep):
 
 
 @router.post("/runs/{run_id}/resume", response_model=RunView, status_code=202)
-def resume(run_id: UUID, data: MessageInput, session: SessionDep, identity: IdentityDep):
+def resume(
+    run_id: UUID,
+    data: MessageInput | workflows.WorkflowResume,
+    session: SessionDep,
+    identity: IdentityDep,
+):
+    if isinstance(data, workflows.WorkflowResume):
+        return workflows.resume(session, identity, run_id, data)
     row, conversation, _ = service.run_access(session, identity, run_id, True)
     if row.status != "waiting_user":
         raise AppError(409, "NOT_WAITING", "此运行不在等待输入状态。")
-    # S05 follow-up is a new idempotent run. Graph checkpoint resume belongs to S06.
+    if row.payload.get("kind") == "workflow":
+        raise AppError(422, "WORKFLOW_INPUT_REQUIRED", "请使用编排确认输入。")
+    # Chat follow-up remains a new idempotent run.
     return service.send_message(session, identity, conversation.id, data)
 
 
@@ -193,3 +203,15 @@ def source_message(message_id: UUID, session: SessionDep, identity: IdentityDep)
         raise missing()
     service.conversation_access(session, identity, message.conversation_id)
     return message
+
+
+@router.post("/conversations/{conversation_id}/workflows", response_model=RunView, status_code=202)
+def start_workflow(
+    conversation_id: UUID, data: workflows.WorkflowInput, session: SessionDep, identity: IdentityDep
+):
+    return workflows.start(session, identity, conversation_id, data)
+
+
+@router.get("/conversations/{conversation_id}/workflows/latest", response_model=RunView | None)
+def latest_workflow(conversation_id: UUID, session: SessionDep, identity: IdentityDep):
+    return workflows.latest(session, identity, conversation_id)

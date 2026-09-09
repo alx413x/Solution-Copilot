@@ -95,3 +95,9 @@ API 以 FastAPI OpenAPI 为实现契约，前端生成类型；SPEC 第 13 节�
 SSE 从数据库按运行内事件序号读取，连接每 25 秒轮换，重连不创建任务。短事务逐次重查身份和项目权限；浏览器 EventSource 自动恢复并由历史消息查询兜底。当前完整 JSON 校验后发布分段文本。
 
 会话上下文使用最近 20 条/20000 字消息，加 20000 字内显式确认的三范围记忆；重置提升 epoch 并停用对应记忆、取消旧运行，不删除历史和客户记忆。S06 接入图检查点，沿用这些授权与持久化边界。
+
+## S06 编排执行边界
+
+方案编排复用 `generation_runs.payload.kind=workflow`，现有 dispatcher 投递同一 Worker，由类型分支进入 LangGraph。进入图前从授权项目读取档案并执行本地混合检索；图依次执行 `validate_requirements → draft_outline → wait_outline_approval`。未确认/不完整需求和大纲各通过原生 interrupt 暂停，前端从持久化 Run 读取门与大纲。
+
+四张原生 PostgreSQL checkpoint 表由迁移维护；checkpointer 与业务数据共用事务，sync durability 保证返回前写完。每次门间推进原子提交，崩溃回到上次提交的门，SSE 事件和最终消息不会领先于 checkpoint。resume 请求只接受门编号、确认和幂等 UUID；组织/客户/项目、Run/thread ID、档案版本、引用来源均由服务器决定。当前本地检索在项目锁内；S07 的远程模型调用必须移出事务。具体取舍见 D018。

@@ -293,6 +293,10 @@ class Message(Record, Base):
 
 
 class GenerationRun(Record, Base):
+    @property
+    def workflow(self):
+        return self.payload.get("workflow")
+
     __tablename__ = "generation_runs"
     organization_id: Mapped[UUID] = mapped_column()
     project_id: Mapped[UUID] = mapped_column()

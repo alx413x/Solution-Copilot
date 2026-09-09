@@ -41,7 +41,13 @@ def run_job(run_id):
             attempt = row.attempts
             row.lease_until = datetime.now(UTC) + timedelta(seconds=180)
             event(row, "run.started", attempt=attempt)
-            event(row, "node.started", node="clarify")
+            event(row, "node.started", node="workflow" if row.workflow else "clarify")
+            if row.payload.get("kind") == "workflow":
+                from solution_copilot.application.workflows import advance
+
+                advance(session, row, conversation, project)
+                session.commit()
+                return
             payload = row.payload
             # ponytail: last 20 messages / 20k chars; add rolling summaries if context grows.
             messages = list(
@@ -141,7 +147,11 @@ def run_job(run_id):
             if (
                 row
                 and row.status in {"queued", "running"}
-                and (attempt is None or row.attempts == attempt)
+                and (
+                    attempt is None
+                    or row.attempts == attempt
+                    or (row.payload.get("kind") == "workflow" and row.attempts == attempt - 1)
+                )
             ):
                 row.status, row.lease_until = "failed", None
                 row.error_message = (

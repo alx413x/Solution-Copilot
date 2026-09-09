@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { components } from "../../../packages/contracts/api";
 import { api } from "../lib/client";
+import { Workflow } from "./workflow";
 import { ClarificationPanel, MemoryPanel } from "./dialogue-records";
 
 type Workspace = components["schemas"]["WorkspaceView"];
@@ -363,6 +364,15 @@ export function Dialogue({
             </button>
           </div>
         </section>
+      )}
+      {id && history.data && (
+        <Workflow
+          key={`workflow:${id}`}
+          conversationId={id}
+          projectId={projectId}
+          epoch={epoch}
+          writable={writable}
+        />
       )}
       <ClarificationPanel
         key={id}
