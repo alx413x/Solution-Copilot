@@ -1,6 +1,6 @@
 # Solution Copilot 架构总览
 
-更新日期：2026-09-09。状态：S00–S05 已实现；Agent 编排及后续业务流程仍为设计基线。
+更新日期：2026-09-12。状态：S00–S06 已通过本地阶段验收；S07/S08 实现与自动/真实链路验收完成，处 review，见 [S07](docs/S07_VALIDATION.md)、[S08](docs/S08_VALIDATION.md)、[S09](docs/S09_VALIDATION.md) 验收记录。
 
 ## 架构定位
 
@@ -101,3 +101,19 @@ SSE 从数据库按运行内事件序号读取，连接每 25 秒轮换，重连
 方案编排复用 `generation_runs.payload.kind=workflow`，现有 dispatcher 投递同一 Worker，由类型分支进入 LangGraph。进入图前从授权项目读取档案并执行本地混合检索；图依次执行 `validate_requirements → draft_outline → wait_outline_approval`。未确认/不完整需求和大纲各通过原生 interrupt 暂停，前端从持久化 Run 读取门与大纲。
 
 四张原生 PostgreSQL checkpoint 表由迁移维护；checkpointer 与业务数据共用事务，sync durability 保证返回前写完。每次门间推进原子提交，崩溃回到上次提交的门，SSE 事件和最终消息不会领先于 checkpoint。resume 请求只接受门编号、确认和幂等 UUID；组织/客户/项目、Run/thread ID、档案版本、引用来源均由服务器决定。当前本地检索在项目锁内；S07 的远程模型调用必须移出事务。具体取舍见 D018。
+
+## S07 方案执行边界
+
+S07 从已完成的 S06 `ready_for_generation` Run 创建项目唯一方案。`solutions` 保存当前指针和输入版本，`solution_versions` 保存完整不可变章节 JSONB；大纲确认、每章生成和人工保存分别追加版本。章节 ID 稳定，重生成单章复制其余章节，历史不依赖可删除的 Chunk。
+
+大纲和章节生成沿用 GenerationRun、dispatcher、SSE 及 DeepSeek JSON 适配器。Worker 在短事务中解析权限、档案、当前方案版本和服务端来源，然后释放事务调用模型；发布时以 attempt、step/baseVersion、epoch、档案版本和引用状态重新校验。多章任务逐章提交，后续失败不会回滚已完成章节，也不会让迟到结果覆盖人工编辑。
+
+模型引用必须逐字匹配本次服务端来源，章节同时保存正文编号和来源快照；`partial` 仅表示摘录匹配。人工编辑以受限 Tiptap JSON 保存新版本并将该章引用标为 `unverified`。历史 quote 按项目 ACL 保留，原文件仍实时鉴权。S08 再消费稳定章节、版本和引用契约执行质量检查与导出；具体限制见 D019 和 SPEC 第 27 节。
+
+## S08 校验与导出执行边界
+
+S08 将质量检查和导出作为既有 `GenerationRun` 的 `verify`/`export` 类型投递，不增加第二套任务表。每个任务显式绑定方案不可变版本，请求编号幂等；Worker 用 attempt 租约和发布 fencing 阻止迟到结果。方案当前指针后续变化不改变已启动任务的输入。
+
+校验把全章正文、本版引用和已确认需求以 100000 字符上限发送给 DeepSeek JSON 适配器，并校验返回的需求覆盖映射与章节定位。发布前重验需求档案版本，再追加本地确定性检查。其中客户泄漏规则只做已登记的同组织其他客户名称精确匹配；其他客户名称不发送给模型，该规则不构成完整 DLP。所有输出仍要求人工核实。
+
+Markdown/DOCX 直接渲染受限编辑器树，保留章节顺序、章内引用编号、待核实标记和文末按章参考资料。DOCX 发布前检查 ZIP 并重新打开；表格节点保真正在补齐验收。导出对象位于组织/项目私有路径，key 包含 Run 和 attempt；下载通过 API 每次重验 ACL 与 SHA-256，不返回可在撤权后继续使用的存储签名 URL。具体取舍见 D020 和 SPEC 第 28 节。

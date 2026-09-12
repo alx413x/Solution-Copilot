@@ -1393,3 +1393,29 @@ class EmbeddingModel(Protocol):
 - `/runs/{id}/resume` 区分 S05 MessageInput 与 S06 `{request_id,gate,approve}`；gate 为 1（需求）或 2（大纲）。未知字段拒绝。编排不得使用普通消息结构绕过确认。
 - 需求门要求八类 confirmed、档案显式确认且无冲突；大纲门重新检查档案版本与检索引用。S06 使用固定章节模板，不生成正文；完成值 `ready_for_generation` 是 S07 输入。
 - 运行按项目串行，等待时释放资源；原生 PostgreSQL checkpoint 和业务结果以确认点为单位事务提交。重放幂等、取消/重置 fencing、权限撤销测试见 S06 验收记录。
+
+## 27. S07 实施补充（2026-09-10，D019）
+
+- `solutions` 按项目唯一，记录组织、项目、会话、S06 workflow Run、标题、状态、需求档案版本及当前版本号；`solution_versions` 保存完整章节 JSONB 快照、创建者、变更说明、生成 Run 和幂等请求。每方案最多 20 章、200 版本，不建立独立章节或 citation 表。
+- 创建方案要求同项目 S06 Run 已成功到达 `ready_for_generation`，并重新校验会话 epoch、完整且已确认的需求档案、档案版本及检索引用。一个项目只复用同一方案；不同输入不能覆盖既有方案。
+- `POST /solutions/{id}/outline` 生成定制大纲；`POST /solutions/{id}/outline/approve` 接受 1–20 个稳定 ID 的章节，可使用既有 `section-xx` 或 UUID，并支持增删、重排和修改标题/目标。标题或目标改变时清空该章原大纲引用。确认后按顺序逐章生成，每章成功发布一个不可变版本。
+- `POST /solutions/{id}/sections/{section_id}/generate` 生成或重生成单章；`PATCH /solutions/{id}` 保存一个人工编辑章节的新版本；`GET /solutions/{id}/versions` 游标读取版本元数据，`GET /solutions/{id}/versions/{number}` 读取历史只读快照。所有写入携带方案 version；冲突返回 409。
+- 章节 content 是 Tiptap JSON。服务端只接受 `doc`、paragraph、二/三级 heading、bullet/ordered list、list item、blockquote、code block、hard break、horizontal rule，以及 bold/italic/strike/code mark；不接受 HTML、链接、下划线、图片或表格。每章序列化后最多 100000 字符、2000 节点、深度 12。
+- 模型返回每段 text 与最多 5 个 source_id/quote。quote 必须逐字匹配服务端选定的已确认需求或本次授权检索结果；正文按 `[n]` 标号并在同章保存引用快照。`partial` 只表示摘录匹配，不能展示为主张已验证；人工保存后该章全部引用改为 `unverified`。
+- 引用快照保留 claim、quote、来源标题/类型、需求或文档/Chunk ID、文档 generation 及定位，不以外键依赖会删除的 Chunk。历史快照仍按项目实时 ACL 读取；资料停用或删除后 quote 保留，原文件下载继续执行即时鉴权。
+- 大纲与章节使用 `prompts/solution-v1.txt` 和现有 DeepSeek JSON 适配器；运行记录 prompt version、模型、token usage 和 latency。远程调用在事务外执行，发布前校验 run attempt、当前 step/baseVersion、会话 epoch、需求档案版本、权限和引用状态；迟到或失效结果不写入。
+- 多章生成在 Run payload 保存 remaining，每章开始新的 attempt 并独立发布；后续章节失败时保留已发布版本。页面轮询持久化 Run，可取消当前生成；S06 LangGraph 不扩展为远程调用事务。
+- 方案页提供大纲编辑、章节导航、Tiptap 编辑、来源侧栏、保存新版本及历史只读查看。S07 不实现 SPEC 12.3 的完整质量检查或第 16 节导出；这些仍属于 S08。
+
+## 28. S08 实施补充（2026-09-11，D020）
+
+- `POST /solutions/{id}/verify` 接受方案 version 和 request UUID；`POST /solutions/{id}/exports` 另接受 `markdown|docx`。`GET /solutions/{id}/deliveries?version=` 返回该版本最近 50 条记录；`GET /exports/{run_id}/download` 仅下载已成功的导出。页面可启动、轮询、下载并定位到问题章节。
+- 两类任务复用 `generation_runs`、dispatcher、180 秒租约、attempt fencing、SSE 和取消契约，不增加数据表。同会话 request UUID 重放返回既有 Run，被其他请求重用返回 409。项目活动任务沿用共享串行限制。
+- 质量检查读取指定不可变方案版本的全部章节、引用快照和所有已确认需求，序列化上下文最多 100000 字符。使用 `prompts/verify-v1.txt`、现有 DeepSeek JSON 适配器和 `s08-v1` Prompt 版本；模型输出不得作为完整性证明或自动认证。
+- 输出最多 100 个问题和 200 个覆盖项。每个问题包含 `rule_id`、`severity`、`section_id|null`、`explanation`、`suggestion`；覆盖映射必须不重不漏地包含当次所有已确认需求，章节 ID 必须存在。覆盖率是具有非空章节映射的已确认需求比例，不表示内容正确。
+- 模型检查需求覆盖、章节矛盾、事实引用、疑似其他客户信息、无资料支持的产品能力承诺和可测量验收指标。服务端再确定性检查必答澄清、未完成章节、无引用章节、引用当前作用域及未验证内容。已登记的同组织其他客户名称仅在服务端做正文精确匹配，不发送给模型；该检查不覆盖别名、改写或其他私密数据。
+- 质量发布时重验操作者 ACL 和需求档案 version；档案变化则拒绝过时结果。页面显示档案版本、覆盖率和问题，明确要求人工核实；方案或需求修改后需重新检查。
+- Markdown 以 UTF-8 导出标题、版本及人工核实提示、章节顺序、编辑器结构、章内引用编号和警告，文末按章列出来源标题、编号、定位、摘录和待核实状态。DOCX 使用 A4 页面、黑色标题/正文、页眉页脚和页码，章节为 Heading 1，正文内二/三级标题保留对应级别。DOCX 写入后必须通过 ZIP 完整性检查并用 `python-docx` 重新打开；表格节点与 Markdown/DOCX 表格保真属于本阶段当前未结验收项。
+- 导出对象 key 为 `{organization}/projects/{project}/exports/{run}/{attempt}.{format}`，使重试和迟到 Worker 不覆盖已发布文件。只有当前成功 attempt 才在 Run 发布 storage key、SHA-256 和 size；迟到、取消或失败产物不提供下载。文件上限复用上传配置。
+- 下载每次重新校验成员、客户授权和项目状态，读取私有对象后校验 SHA-256；响应使用 `private, no-store` 和 `nosniff`，并记录不含正文的 `export.download` 审计元数据。当前使用 API 鉴权代理，不使用签名 URL，因此旧地址在撤权后立即失效。
+- S08 不包含 PDF、品牌 DOCX 模板、完整 DLP 或自动认证。导出只保留当时方案版本，不修改或重新核定历史内容。
