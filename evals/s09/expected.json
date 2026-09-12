@@ -1,0 +1,69 @@
+{
+  "synthetic": true,
+  "meeting_1_required": {
+    "background": "示例客户售前团队目前用文档整理需求。",
+    "pain_point": "多人整理时需求遗漏，无法追溯来源。",
+    "goal": "建设可追溯的方案草稿工作台。",
+    "functional": "支持需求记录、资料上传和人工确认。",
+    "integration": "演示阶段不对接外部业务系统。",
+    "security_compliance": "不同客户数据必须隔离，成员只能访问授权项目。",
+    "constraint": "仅本地部署，本阶段不提供报价。",
+    "acceptance_metric": "验收时使用两个客户账号检查越权读取均被拒绝；重启后恢复任务，同一确认只写入一次。"
+  },
+  "extraction_labels": {
+    "meeting-1.md": [
+      "background",
+      "pain_point",
+      "goal",
+      "functional",
+      "integration",
+      "security_compliance",
+      "constraint",
+      "acceptance_metric"
+    ],
+    "meeting-2.md": [
+      "background",
+      "pain_point",
+      "goal",
+      "functional",
+      "integration",
+      "security_compliance",
+      "constraint",
+      "acceptance_metric"
+    ],
+    "meeting-3.md": [
+      "background",
+      "pain_point",
+      "goal",
+      "functional",
+      "integration",
+      "security_compliance",
+      "constraint",
+      "acceptance_metric"
+    ]
+  },
+  "conflict_expected": {
+    "category": "timeline_budget",
+    "old": "100万元",
+    "new": "80万元",
+    "requires_explicit_resolution": true
+  },
+  "must_cover": [
+    "示例客户售前团队目前用文档整理需求。",
+    "多人整理时需求遗漏，无法追溯来源。",
+    "建设可追溯的方案草稿工作台。",
+    "支持需求记录、资料上传和人工确认。",
+    "演示阶段不对接外部业务系统。",
+    "不同客户数据必须隔离，成员只能访问授权项目。",
+    "仅本地部署，本阶段不提供报价。",
+    "验收时使用两个客户账号检查越权读取均被拒绝；重启后恢复任务，同一确认只写入一次。"
+  ],
+  "forbidden_promises": [
+    "自动报价",
+    "自动签约",
+    "识别准确率100%"
+  ],
+  "retrieval_corpus": "../s03-corpus.json",
+  "retrieval_evidence": "../s03-results.json",
+  "metric_notes": "category recall is measured against authored labels; exact quote matching is not semantic citation support. Model coverage is advisory."
+}

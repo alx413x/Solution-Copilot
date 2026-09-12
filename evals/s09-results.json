@@ -1,0 +1,105 @@
+{
+  "project_id": "b81a9de4-ec8b-4367-a313-6242ce0fbe1c",
+  "customer_id": "31cf1909-7fcf-4c37-af67-4f40f2b59506",
+  "solution_id": "c706aae0-98f0-4fda-a64a-95a79317cc31",
+  "version": 7,
+  "elapsed_seconds": 52.16,
+  "document_ready": true,
+  "extraction_items": 8,
+  "extraction_category_recall": 1.0,
+  "extraction_quote_match_rate": 1.0,
+  "advisory_coverage_percent": 100.0,
+  "quality_issues": [
+    {
+      "rule_id": "citation_scope",
+      "severity": "warning",
+      "section_id": "8991d599-1c84-47b5-b81f-42ed2dec8b0b",
+      "explanation": "该章几乎每项主张都同时挂载用户输入与会议纪要两类引用，但引文本身并未逐项区分是哪个来源支持哪项主张，读者难以判断工作台功能、数据隔离、资料上传解析状态等主张究竟由哪条来源支撑。引用摘录与主张的具体范围对应关系不清晰。",
+      "suggestion": "为每项主张单独标明唯一或主要来源，避免同一段多处主张共用一组笼统引用，使引用摘录与主张范围一一对应。"
+    },
+    {
+      "rule_id": "unsupported_promise",
+      "severity": "warning",
+      "section_id": "8991d599-1c84-47b5-b81f-42ed2dec8b0b",
+      "explanation": "该章称‘设计建议：需求记录以项目为归属单位，每条需求保留录入人、录入时间与原始描述字段，作为后续人工确认和来源追溯的锚点’，并称其已列为验收标准，但所引资料仅能证明工作台需支持需求记录、资料上传、人工确认及可追溯目标，未证明这些具体字段或设计已获确认或列为验收标准。",
+      "suggestion": "将该段明确标注为方案建议而非已确认能力或验收标准，或补充能够支持‘已列为验收标准’这一具体范围的引用；否则改为待确认条目。"
+    },
+    {
+      "rule_id": "contradiction",
+      "severity": "warning",
+      "section_id": "8991d599-1c84-47b5-b81f-42ed2dec8b0b",
+      "explanation": "该章一方面说单点登录涉及身份源与外部系统交互，因‘演示阶段不进行外部业务系统的对接’而不作为本阶段承诺，另一方面又将其作为扩展方向纳入设计讨论，前后表述可能让读者误以为本阶段仍可能实现单点登录，存在范围边界不清。",
+      "suggestion": "明确单点登录仅记录为后续演进待确认项，本阶段不设计、不承诺，并删除可能被解读为本阶段实施的内容。"
+    },
+    {
+      "rule_id": "acceptance_metric",
+      "severity": "warning",
+      "section_id": "d5a7dc92-b5de-449a-8336-5bbfa9c427ea",
+      "explanation": "‘重启后需恢复任务’只给出测量动作，未明确任务在何种状态、重启后多久、以何种可观察状态判定为恢复，缺少完整可执行的验收条件；‘越权读取均被拒绝’也未说明判定为拒绝的可观察响应。",
+      "suggestion": "补充可重复执行的验收条件，例如指定测试环境、任务状态、重启前后核对方式、预期响应或界面状态，形成可复现的操作步骤与预期结果。"
+    },
+    {
+      "rule_id": "acceptance_metric",
+      "severity": "warning",
+      "section_id": "d5a7dc92-b5de-449a-8336-5bbfa9c427ea",
+      "explanation": "‘同一确认只写入一次’未定义‘同一确认’的判定口径与幂等范围，仅给出结果描述，缺少测量条件和可验证方法，无法稳定复现。",
+      "suggestion": "明确同一确认的判定键、重复触发场景、核对写入条数的方法，并说明幂等范围待确认前该项仅作为验收方法提出。"
+    },
+    {
+      "rule_id": "factual_citation",
+      "severity": "warning",
+      "section_id": "d5a7dc92-b5de-449a-8336-5bbfa9c427ea",
+      "explanation": "‘本方案引用的资料仅用于本地验收，不包含真实客户资料’援引资料仅表明该文件用于本地 S02 验收，未证明全部方案引用均不含真实客户资料，引用范围与主张范围不匹配。",
+      "suggestion": "将该主张限定为引用资料文件的属性，或补充能证明整个方案引用均不含真实客户资料的依据，否则标记为待核实。"
+    },
+    {
+      "rule_id": "incomplete_section",
+      "severity": "info",
+      "section_id": null,
+      "explanation": "全文已包含背景与目标、功能与隔离设计、实施与验收三章，但技术架构、部署拓扑、安全合规、实施排期与风险清单等章节均标注待进一步核实或在本次范围外，章节完整性尚未闭合。",
+      "suggestion": "将上述待核实项登记为需求记录中的待确认条目，由售前团队人工确认后补充，避免以未确认内容对外表述。"
+    },
+    {
+      "rule_id": "required_clarification",
+      "severity": "warning",
+      "section_id": null,
+      "explanation": "越权拒绝判定方式、任务恢复时间要求、确认写入幂等范围以及章节行号定位精度均被标注为待确认，说明关键验收口径尚未闭合。",
+      "suggestion": "在需求记录中逐项登记这些待确认条目，明确责任人与确认方式，确认后再补充到验收章节。"
+    },
+    {
+      "rule_id": "unverified_content",
+      "severity": "warning",
+      "section_id": "6fb7a05a-2506-4a85-8ee7-097cac751dd1",
+      "explanation": "本章包含尚未人工核实的内容。",
+      "suggestion": "逐项核对主张与来源摘录；模型检查不能代替人工确认。"
+    },
+    {
+      "rule_id": "unverified_content",
+      "severity": "warning",
+      "section_id": "8991d599-1c84-47b5-b81f-42ed2dec8b0b",
+      "explanation": "本章包含尚未人工核实的内容。",
+      "suggestion": "逐项核对主张与来源摘录；模型检查不能代替人工确认。"
+    },
+    {
+      "rule_id": "unverified_content",
+      "severity": "warning",
+      "section_id": "d5a7dc92-b5de-449a-8336-5bbfa9c427ea",
+      "explanation": "本章包含尚未人工核实的内容。",
+      "suggestion": "逐项核对主张与来源摘录；模型检查不能代替人工确认。"
+    }
+  ],
+  "semantic_citation_support_rate": null,
+  "semantic_citation_note": "模型建议和摘录匹配不能代替逐条人工支持度标注。",
+  "unauthorized_download_denied": true,
+  "history_immutable": true,
+  "exports": {
+    "markdown": {
+      "run_id": "dac5da7b-0fbd-47d7-94e8-9868e7806f4d",
+      "bytes": 14648
+    },
+    "docx": {
+      "run_id": "f0d892a1-8649-4179-9a01-5526aaf7b3d9",
+      "bytes": 42154
+    }
+  }
+}

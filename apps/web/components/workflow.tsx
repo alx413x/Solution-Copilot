@@ -70,10 +70,14 @@ export function Workflow({
   }
   return (
     <section className="panel">
+      {run?.status === "succeeded" && (
+        <Link href={`/projects/${projectId}/solution?workflow=${run.id}`}>
+          进入方案生成与编辑 →
+        </Link>
+      )}
       <h2>方案编排</h2>
       <p className="muted">
-        先确认需求，再确认大纲。当前大纲为固定 14
-        章模板，正文生成将在下一阶段接入。
+        确认需求与初步大纲后，进入方案页细化大纲、生成正文并保存版本。
       </p>
       {(error || query.error) && (
         <p className="error" role="alert">
@@ -92,7 +96,7 @@ export function Workflow({
                   workflow?.gate === 1
                     ? "请补齐八类需求并确认档案"
                     : "请审核下方大纲",
-                succeeded: "大纲已确认，等待接入正文生成",
+                succeeded: "编排已完成，可进入方案生成与编辑",
                 failed: "运行失败",
                 cancelled: "运行已取消",
               } as Record<string, string>

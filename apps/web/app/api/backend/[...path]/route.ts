@@ -21,6 +21,8 @@ async function proxy(
       "runs",
       "memories",
       "messages",
+      "solutions",
+      "exports",
     ].includes(path[0]) ||
     path.some((p) => !/^[-a-zA-Z0-9]+$/.test(p))
   )

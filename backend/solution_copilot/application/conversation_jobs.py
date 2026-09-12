@@ -37,6 +37,18 @@ def run_job(run_id):
             row, conversation, project = checked_run(session, run_id)
             if row.status != "queued":
                 return
+            if row.payload.get("kind") in {"verify", "export"}:
+                from solution_copilot.application.deliveries import run_job as delivery_job
+
+                session.rollback()
+                delivery_job(run_id)
+                return
+            if row.payload.get("kind") == "solution":
+                from solution_copilot.application.solution_jobs import run_job as solution_job
+
+                session.rollback()
+                solution_job(run_id)
+                return
             row.status, row.attempts = "running", row.attempts + 1
             attempt = row.attempts
             row.lease_until = datetime.now(UTC) + timedelta(seconds=180)

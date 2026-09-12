@@ -302,7 +302,7 @@ def advance(session, row, conversation, project):
             [
                 {
                     "type": "text",
-                    "text": "大纲已确认。S06 编排完成；正文生成将在 S07 接入。\n"
+                    "text": "大纲已确认。可进入方案页细化大纲、生成正文并保存版本。\n"
                     + "\n".join(s["title"] for s in view["outline"]),
                 }
             ],

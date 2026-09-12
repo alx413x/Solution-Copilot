@@ -111,3 +111,38 @@ def request_json(prompt, data, schema, prompt_version):
         raise AppError(
             502, "MODEL_OUTPUT", "模型未返回完整有效的 JSON，结果未写入，请重试。"
         ) from None
+
+
+def solution(data, outline=False):
+    from pathlib import Path
+    from time import monotonic
+
+    from solution_copilot.application.solution_schemas import OutlineOutput, SectionOutput
+
+    schema = OutlineOutput if outline else SectionOutput
+    prompt = (Path(__file__).resolve().parents[3] / "prompts" / "solution-v1.txt").read_text()
+    started = monotonic()
+    output, info = request_json(
+        prompt + "\nschema: " + json.dumps(schema.model_json_schema(), ensure_ascii=False),
+        data,
+        schema,
+        "s07-v1",
+    )
+    return output, {**info, "latency_ms": round((monotonic() - started) * 1000)}
+
+
+def verify(data):
+    from pathlib import Path
+    from time import monotonic
+
+    from solution_copilot.application.delivery_schemas import QualityOutput
+
+    prompt = (Path(__file__).resolve().parents[3] / "prompts" / "verify-v1.txt").read_text()
+    started = monotonic()
+    output, info = request_json(
+        prompt + "\nschema: " + json.dumps(QualityOutput.model_json_schema(), ensure_ascii=False),
+        data,
+        QualityOutput,
+        "s08-v1",
+    )
+    return output, {**info, "latency_ms": round((monotonic() - started) * 1000)}

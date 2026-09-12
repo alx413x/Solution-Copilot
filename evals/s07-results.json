@@ -1,0 +1,48 @@
+{
+  "project_id": "71087696-d28d-47aa-8ca3-175b8c3637d1",
+  "solution_id": "274efdd6-3f50-446a-9825-6a4e2eeeec0d",
+  "outline_run_id": "1f0210b7-d206-4b12-9b65-96285aefb22b",
+  "generation_run_id": "4745ad91-b3b7-46e5-9c6b-9a33917b4d8e",
+  "section_run_id": "f4d6b579-2d1e-4737-b748-3e4ccb51de58",
+  "elapsed_seconds": 49.14,
+  "version": 7,
+  "sections": 2,
+  "citations": 21,
+  "model_info": {
+    "98119221-17b1-4322-85ed-7ead5df13c83": {
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "total_tokens": 3606,
+        "prompt_tokens": 2415,
+        "completion_tokens": 1191,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2415
+      },
+      "provider": "deepseek",
+      "latency_ms": 7714,
+      "prompt_version": "s07-v1"
+    },
+    "bcb512c7-ee9e-426a-9526-53d7b6595929": {
+      "model": "deepseek-v4-flash-vision-exp",
+      "usage": {
+        "total_tokens": 3744,
+        "prompt_tokens": 2404,
+        "completion_tokens": 1340,
+        "prompt_tokens_details": {
+          "cached_tokens": 384
+        },
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 2020
+      },
+      "provider": "deepseek",
+      "latency_ms": 9387,
+      "prompt_version": "s07-v1"
+    }
+  },
+  "manual_edit_preserved": true,
+  "history_immutable": true,
+  "sse_completed": true
+}

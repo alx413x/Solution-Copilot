@@ -13,6 +13,7 @@ from apps.api.customers import router
 from apps.api.documents import router as documents_router
 from apps.api.requirements import router as requirements_router
 from apps.api.retrieval import router as retrieval_router
+from apps.api.solutions import router as solutions_router
 from apps.api.upload_limit import UploadLimit
 
 
@@ -28,6 +29,7 @@ app.include_router(conversations_router)
 app.include_router(documents_router)
 app.include_router(retrieval_router)
 app.include_router(requirements_router)
+app.include_router(solutions_router)
 app.add_middleware(UploadLimit)
 
 

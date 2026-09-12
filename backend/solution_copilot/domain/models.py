@@ -396,3 +396,47 @@ class AuditEvent(Record, Base):
     action: Mapped[str] = mapped_column(String(80))
     resource_id: Mapped[UUID] = mapped_column()
     data: Mapped[dict] = mapped_column(JSONB)
+
+
+class Solution(Record, Base):
+    __tablename__ = "solutions"
+    organization_id: Mapped[UUID] = mapped_column()
+    project_id: Mapped[UUID] = mapped_column(unique=True)
+    conversation_id: Mapped[UUID] = mapped_column()
+    profile_version: Mapped[int] = mapped_column()
+    workflow_run_id: Mapped[UUID] = mapped_column(ForeignKey("generation_runs.id"), unique=True)
+    title: Mapped[str] = mapped_column(String(200))
+    status: Mapped[str] = mapped_column(String(20), default="outlining")
+    version: Mapped[int] = mapped_column(default=1)
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "project_id"], ["projects.organization_id", "projects.id"]
+        ),
+        ForeignKeyConstraint(
+            ["organization_id", "conversation_id"],
+            ["conversations.organization_id", "conversations.id"],
+        ),
+        UniqueConstraint("organization_id", "id"),
+        CheckConstraint("status IN ('outlining','generating','draft')"),
+    )
+
+
+class SolutionVersion(Record, Base):
+    __tablename__ = "solution_versions"
+    organization_id: Mapped[UUID] = mapped_column()
+    solution_id: Mapped[UUID] = mapped_column()
+    version: Mapped[int] = mapped_column()
+    # ponytail: bounded 20-section snapshots; normalize at measured storage pressure.
+    sections: Mapped[list] = mapped_column(JSONB)
+    created_by: Mapped[UUID] = mapped_column(ForeignKey("users.id"))
+    generation_run_id: Mapped[UUID | None] = mapped_column(ForeignKey("generation_runs.id"))
+    request_id: Mapped[UUID | None] = mapped_column()
+    request_data: Mapped[dict] = mapped_column(JSONB, default=dict)
+    change_summary: Mapped[str] = mapped_column(String(240))
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["organization_id", "solution_id"], ["solutions.organization_id", "solutions.id"]
+        ),
+        UniqueConstraint("solution_id", "version"),
+        UniqueConstraint("solution_id", "request_id"),
+    )

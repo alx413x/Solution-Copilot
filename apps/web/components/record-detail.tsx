@@ -186,6 +186,9 @@ export function RecordDetail({
               <p>
                 <Link href={`/projects/${id}/dialogue`}>澄清与对话 →</Link>
               </p>
+              <p>
+                <Link href={`/projects/${id}/solution`}>方案与版本 →</Link>
+              </p>
               <Link href={`/projects/${id}/knowledge`}>管理项目资料 →</Link>
               <p>
                 <Link href={`/projects/${id}/requirements`}>
